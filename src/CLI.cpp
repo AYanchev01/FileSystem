@@ -222,9 +222,6 @@ void CLI::cp(const std::vector<std::string>& args) {
       return;
     }
 
-    std::cout << "Adding file " << file_to_add->getName() << " to " << dest_path << std::endl;
-    std::cout << "File contents: " << file_to_add->getContents() << std::endl;
-    std::cout << "File type: " << (int) file_to_add->getType() << std::endl;
     fs_.addFile(file_to_add, dest_path);
   }
 }
