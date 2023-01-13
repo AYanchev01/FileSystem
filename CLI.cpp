@@ -30,8 +30,6 @@ void CLI::run() {
         cat(components);
         } else if (components[0] == "cp") {
         cp(components);
-        } else if (components[0] == "mv") {
-        mv(components);
         } else if (components[0] == "rm") {
         rm(components);
         } else if (components[0] == "mkdir") {
@@ -166,93 +164,60 @@ void CLI::cat(const std::vector<std::string>& args) {
 
 void CLI::cp(const std::vector<std::string>& args) {
   // Check if the number of arguments is correct
-  if (args.size() != 3) {
+  if (args.size() < 3) {
     std::cout << "cp: invalid number of arguments" << std::endl;
+    std::cout << "Usage: cp <source> [<source> .. <source>] <destination>" << std::endl;
     return;
   }
 
-  // Get the source file and destination path
-  std::string src_path = args[1];
-  std::string dest_path = args[2];
+  // Get the destination path
+  std::string dest_path = args[args.size() - 1];
 
-  // Get the source file
-  File* src_file = fs_.getFile(src_path);
-  if (src_file == nullptr) {
-    std::cout << "cp: source file does not exist" << std::endl;
-    return;
-  }
-
-  // Check if the destination path is a directory
-  File* dest_file = fs_.getFile(dest_path);
-  if (dest_file != nullptr && dest_file->getType() == Type::DIRECTORY) {
-    // The destination is a directory, append the source file name
-    dest_path += '/';
-    dest_path += src_file->getName();
-  }
-
-  // Check if the destination file already exists
-  dest_file = fs_.getFile(dest_path);
-  if (dest_file != nullptr) {
-    std::cout << "cp: destination file already exists" << std::endl;
-    return;
-  }
-
-  // Add the source file to the file system tree with the new name
-  fs_.addFile(src_file, dest_path);
-}
-
-void CLI::mv(const std::vector<std::string>& args) {
-  // Check if there are enough arguments
-  if (args.size() != 2) {
-    std::cout << "Usage: mv <source> <destination>" << std::endl;
-    return;
-  }
-
-  // Get the source file
-  FileNode* source = fs_.getFileNode(args[0]);
-  if (source == nullptr) {
-    std::cout << "File not found: " << args[0] << std::endl;
-    return;
-  }
-
-  // Split the destination path into components
-  std::vector<std::string> components = fs_.splitPath(args[1]);
-
-  // Find the parent directory of the destination
-  FileNode* parent = fs_.cwd_;
-  for (size_t i = 0; i < components.size() - 1; i++) {
-    Directory* dir = dynamic_cast<Directory*>(parent->file);
-    if (dir == nullptr) {
-      // The parent is not a directory
-      std::cout << "Not a directory: " << args[1] << std::endl;
+  for (int i = 1; i < args.size() - 2; i++)
+  {
+    // Get the source file
+    std::string src_path = args[i];
+    File* src_file(fs_.getFile(src_path));
+    if (src_file == nullptr) {
+      std::cout << "cp: source file does not exist" << std::endl;
       return;
     }
-    // Use the new "Directory::getChildren" method to get the children of the current directory
-    parent = &(*dir->getChildren()[components[i]]);
-  }
 
-  // Check if the destination is a directory
-  Directory* dest_dir = dynamic_cast<Directory*>(parent->file);
-  if (dest_dir == nullptr) {
-    std::cout << "Not a directory: " << args[1] << std::endl;
-    return;
-  }
+    // Check if the destination path is a directory
+    File* dest_file = fs_.getFile(dest_path);
+    if (dest_file != nullptr && dest_file->getType() == Type::DIRECTORY) {
+      // The destination is a directory, append the source file name
+      dest_path += '/';
+      dest_path += src_file->getName();
+    }
 
-  // Add the file to the destination directory
-  dest_dir->addEntry(source);
+    // Check if the destination file already exists
+    dest_file = fs_.getFile(dest_path);
+    if (dest_file != nullptr) {
+      std::cout << "cp: destination file already exists" << std::endl;
+      return;
+    }
+
+    // Add the source file to the file system tree with the new name
+    fs_.addFile(src_file, dest_path);
+  }
 }
 
 void CLI::rm(const std::vector<std::string>& args) {
-  if (args.size() != 1) {
+  if (args.size() < 2) {
     std::cout << "Invalid number of arguments for rm." << std::endl;
+    std::cout << "Usage: rm <path> [<path> ... <path>]" << std::endl;
     return;
   }
 
-  // Get the path of the file to delete
-  std::string path = args[0];
+  for(int i = 1; i < args.size(); i++)
+  {
+    // Get the path of the file to delete
+    std::string path = args[i];
 
-  // Delete the file
-  fs_.deleteFile(path);
+    // Delete the file
+    fs_.deleteFile(path);
+  }
 }
 
 void CLI::mkdir(const std::vector<std::string>& args) {
@@ -262,47 +227,54 @@ void CLI::mkdir(const std::vector<std::string>& args) {
   }
 
   // Split the path into components
-  std::vector<std::string> components = fs_.splitPath(args[1]);
+  std::string path = args[1];
+  std::vector<std::string> components = fs_.splitPath(path);
 
   // Find the parent directory
-  FileNode* parent = fs_.cwd_;
-  for (size_t i = 0; i < components.size() - 1; i++) {
-    Directory* dir = dynamic_cast<Directory*>(parent->file);
-    if (dir == nullptr) {
-      std::cout << "Error: parent directory is not a directory" << std::endl;
+  Directory* parent = nullptr;
+  if (path[0] == '/') {
+    // Absolute path
+    parent = fs_.root_;
+  } else {
+    // Relative path
+    parent = fs_.cwd_;
+  }
+
+  for (int i = 0; i < components.size() - 2; i++) {
+    if (parent->getType() != Type::DIRECTORY) {
+      std::cout << "Error: " << components[i] << "is not a directory!" << std::endl;
       return;
     }
     // Use the new "Directory::getChildren" method to get the children of the current directory
-    parent->file = &(*dir->getChildren()[components[i]]->file);
+    parent = dynamic_cast<Directory*>(parent->getEntry(components[i]));
   }
 
   // Check if the new directory already exists
-  Directory* dir = dynamic_cast<Directory*>(parent->file);
-  if (dir == nullptr) {
-    std::cout << "Error: parent directory is not a directory" << std::endl;
+  if (parent->getType() != Type::DIRECTORY) {
+    std::cout << "Error: " << components[components.size() - 2] << "is not a directory!" << std::endl;
     return;
   }
-  // Use the new "Directory::getChildren" method to get the children of the parent directory
-  if (dir->getChildren().find(components.back()) != dir->getChildren().end()) {
+
+  if (parent->getEntry(components.back()) != nullptr) {
     std::cout << "Error: directory already exists" << std::endl;
     return;
   }
 
   // Create the new directory
-  FileNode new_dir;
-  new_dir.file = new Directory(components.back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, dir);
-  dir->getChildren()[components.back()] = &new_dir;
+  Directory* new_dir;
+  new_dir = new Directory(components.back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, parent);
+  parent->getChildren().push_back(new_dir);
 }
 
 void CLI::rmdir(const std::vector<std::string>& args) {
   // Check if the number of arguments is correct
-  if (args.size() != 1) {
+  if (args.size() != 2) {
     std::cout << "Usage: rmdir <directory>" << std::endl;
     return;
   }
 
   // Get the path of the directory to delete
-  std::string path = args[0];
+  std::string path = args[1];
   if (path[0] != '/') {
     // The path is not absolute, make it relative to the current working directory
     path = fs_.getCurrentDirectory() + '/' + path;
@@ -310,11 +282,11 @@ void CLI::rmdir(const std::vector<std::string>& args) {
 
   // Get the directory to delete
   File* file = fs_.getFile(path);
-  Directory* dir = dynamic_cast<Directory*>(file);
-  if (dir == nullptr) {
+  if (file->getType() != Type::DIRECTORY) {
     std::cout << "Error: " << path << " is not a directory" << std::endl;
     return;
   }
+  Directory* dir = dynamic_cast<Directory*>(file);
 
   // Check if the directory is empty
   if (!dir->isEmpty()) {
@@ -323,11 +295,10 @@ void CLI::rmdir(const std::vector<std::string>& args) {
   }
 
   // Find the parent directory
-  std::string parent_path = path.substr(0, path.find_last_of('/'));
-  File* parent_file = fs_.getFile(parent_path);
-  Directory* parent_dir = dynamic_cast<Directory*>(parent_file);
-  if (parent_dir == nullptr) {
-    std::cout << "Error: " << parent_path << " is not a directory" << std::endl;
+  Directory* parent_dir = dir->getParent();
+  if(parent_dir == nullptr)
+  {
+    std::cout << "Error: " << parent_dir->getName() << " is not a directory" << std::endl;
     return;
   }
 
@@ -376,13 +347,13 @@ void CLI::rmdir(const std::vector<std::string>& args) {
 
 void CLI::stat(const std::vector<std::string>& args) {
   // Check if a file was specified
-  if (args.empty()) {
-    std::cout << "Error: No file specified" << std::endl;
+  if (args .size() != 2) {
+    std::cout << "Usage: stat <file>" << std::endl;
     return;
   }
 
   // Get the file from the file system
-  File* file = fs_.getFile(args[0]);
+  File* file = fs_.getFile(args[1]);
   if (file == nullptr) {
     std::cout << "Error: File not found" << std::endl;
     return;

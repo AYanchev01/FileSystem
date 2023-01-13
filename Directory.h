@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "File.h"
 #include <vector>
+#include <algorithm>
 
 class Directory : public File {
 public:
