@@ -7,10 +7,6 @@ File::File(const std::string& name, int serial_num, std::time_t last_access, std
      
 
 // Getters
-std::string File::getContents() const {
-    return contents_;
-}
-
 std::string File::getName() const {
     return name_;
 }
@@ -37,10 +33,6 @@ Type File::getType() const {
 }
 
 // Setters
-void File::setContents(const std::string& contents) {
-    contents_ = contents;
-}
-
 void File::setName(const std::string& name) {
     name_ = name;
 }

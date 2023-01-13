@@ -13,7 +13,6 @@ public:
        std::time_t last_metadata_change, int hard_link_count, int size, Type type);
 
   // Getters
-  std::string getContents() const;
   std::string getName() const;
   int getSerialNum() const;
   std::time_t getLastAccessTime() const;
@@ -24,7 +23,6 @@ public:
   Type getType() const;
 
   // Setters
-  void setContents(const std::string& contents);
   void setName(const std::string& name);
   void setLastAccessTime(std::time_t last_access);
   void setLastDataChangeTime(std::time_t last_data_change);
@@ -35,7 +33,6 @@ public:
 
   virtual ~File() { }
 private:
-  std::string contents_;
   std::string name_;
   int serial_num_;
   std::time_t last_access_;

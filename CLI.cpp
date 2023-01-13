@@ -38,14 +38,14 @@ void CLI::run() {
         mkdir(components);
         } else if (components[0] == "rmdir") {
         rmdir(components);
-        } else if (components[0] == "ln") {
-        //ln(components);
+        // } else if (components[0] == "ln") {
+        // ln(components);
         } else if (components[0] == "stat") {
         stat(components);
-        } else if (components[0] == "mount") {
-        //mount(components);
-        } else if (components[0] == "umount") {
-        //umount(components);
+        // } else if (components[0] == "mount") {
+        // mount(components);
+        // } else if (components[0] == "umount") {
+        // umount(components);
         } else if (components[0] == "exit") {
         break;
         } else {
@@ -118,7 +118,7 @@ void CLI::cat(const std::vector<std::string>& args) {
     }
 
     // Print the contents of the file
-    std::cout << file->getContents() << std::endl;
+    //std::cout << file->getContents() << std::endl;
 }
 
 void CLI::cp(const std::vector<std::string>& args) {

@@ -2,48 +2,52 @@
 
 FileSystem::FileSystem() {
   // Create the root directory and set it as the current working directory
-  root_ = new FileNode{nullptr, {}};
-  root_->file = new Directory("/", 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, nullptr);
+  root_ = new Directory("/", 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, nullptr);
   cwd_ = root_;
 }
 
 FileSystem::~FileSystem() {
   // Recursively delete all the nodes in the file system tree
-  deleteNode(root_);
+  File* root = root_;
+  deleteEntry(root);
 }
 
 void FileSystem::addFile(File* file, const std::string& path) {
   // Split the path into components
   std::vector<std::string> components = splitPath(path);
   // Find the node to add the file to
-  FileNode* node = root_;
+  Directory* node = root_;
   for (const std::string& component : components) {
     // Check if the component is in the children vector
-    auto it = std::find_if(node->children.begin(), node->children.end(), [&](auto* child) {
-      return child->file->getName() == component;
-    });
-    if (it != node->children.end()) {
+    auto it = node->getEntry(component);
+    if (it != nullptr) {
       // The component was found, move to the next node
-      node = *it;
+      node = (Directory*) it;
     } else {
       // The component was not found, create a new node
       // Use the new constructor of the Directory class, passing the parent directory as an argument
-      Directory* parent = dynamic_cast<Directory*>(node->file);
-      node->children.emplace_back(new FileNode{new Directory(component, 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, parent), {}});
-      node = node->children.back();
+      Directory* parent = dynamic_cast<Directory*>(node);
+      node->addEntry(new Directory(component, 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, parent));
+      node = (Directory*) node->getChildren().back();
     }
   }
   // Add the file to the current node
-  node->file = file;
+  node->addEntry(file);
 }
 
-void FileSystem::deleteNode(FileNode*& node) {
+void FileSystem::deleteEntry(File*& node) {
 // Recursively delete all the children of this node
-for (auto& child : node->children) {
-deleteNode(child);
+if (node == nullptr) {
+  return;
 }
-// Delete the file for this node
-delete node->file;
+if (node->getType() == Type::DIRECTORY) {
+    Directory* dir = dynamic_cast<Directory*>(node);
+    for (auto& child : dir->getChildren()) {
+      deleteEntry(child);
+    }
+  }
+  delete node;
+  node = nullptr;
 }
 
 void FileSystem::deleteFile(const std::string& path) {
@@ -51,32 +55,27 @@ void FileSystem::deleteFile(const std::string& path) {
   std::vector<std::string> components = splitPath(path);
 
   // Find the parent directory of the file
-  FileNode* parent = cwd_;
+  Directory* parent = cwd_;
   for (size_t i = 0; i < components.size() - 1; i++) {
-    Directory* dir = dynamic_cast<Directory*>(parent->file);
-    if (dir == nullptr) {
-      // The parent is not a directory
-      return;
-    }
     // Use the new "Directory::getChildren" method to get the children of the current directory
-    auto it = dir->getChildren().find(components[i]);
-    if (it == dir->getChildren().end()) {
+    auto it = parent->getEntry(components[i]);
+    if (it == nullptr) {
       // The component was not found
+      std::cout << "The component was not found" << std::endl;
       return;
     }
-    parent = it->second;
+    parent = dynamic_cast<Directory*>(it);
   }
 
   // Find the file to delete
-  Directory* dir = dynamic_cast<Directory*>(parent->file);
-  if (dir != nullptr) {
+  if (parent != nullptr) {
     // Find the iterator to the file in the parent's children list
     // Use the new "Directory::getChildren" method to get the children of the parent directory
-    auto it = dir->getChildren().find(components.back());
-    if (it != dir->getChildren().end()) {
+    auto it = parent->getEntry(components.back());
+    if (it != nullptr) {
       // Delete the file and remove it from the parent's children list
-      deleteNode(it->second);
-      dir->getChildren().erase(it);
+      deleteEntry(it);
+      parent->removeEntry(it->getName());
     }
   }
 }
@@ -87,14 +86,9 @@ void FileSystem::changeDirectory(const std::string& path) {
   std::vector<std::string> components = splitPath(path);
 
   // Find the target directory
-  FileNode* target = cwd_;
+  Directory* target = cwd_;
   for (const std::string& component : components) {
-    Directory* dir = dynamic_cast<Directory*>(target->file);
-    if (dir == nullptr) {
-      // The target is not a directory
-      return;
-    }
-    target->file = &(*dir->getChildren()[component]->file);
+    target = (Directory*) target->getEntry(component);
   }
 
   // Set the target as the current working directory
@@ -104,15 +98,14 @@ void FileSystem::changeDirectory(const std::string& path) {
 std::string FileSystem::getCurrentDirectory() const {
   // Recursively build the path to the current working directory
   std::string path;
-  FileNode* node = cwd_;
+  Directory* node = cwd_;
   while (node != root_) {
-    Directory* dir = dynamic_cast<Directory*>(node->file);
-    if (dir == nullptr) {
+    if (node->getType() != Type::DIRECTORY) {
       // The node is not a directory
       return "";
     }
-    path = '/' + node->file->getName() + path;
-    node->file = dir->getParent();
+    path = '/' + node->getName() + path;
+    node = node->getParent();
   }
   return path;
 }
@@ -122,44 +115,20 @@ File* FileSystem::getFile(const std::string& path) const {
   std::vector<std::string> components = splitPath(path);
 
   // Find the target file
-  FileNode* target = cwd_;
+  Directory* parent = cwd_;
   for (const std::string& component : components) {
-    Directory* dir = dynamic_cast<Directory*>(target->file);
-    if (dir == nullptr) {
+    if (parent->getType() != Type::DIRECTORY) {
       // The target is not a directory
+      std::cout << "Wrong path" << std::endl;
       return nullptr;
     }
-    target->file = &(*dir->getChildren()[component]->file);
+    parent = (Directory*) parent->getEntry(component);
   }
-  return target->file;
+  return parent->getEntry(components.back());
 }
 
-FileNode*& FileSystem::getRootDirectory() {
+Directory*& FileSystem::getRootDirectory() {
   return root_;
-}
-
-FileNode* FileSystem::getFileNode(const std::string& path) {
-    // Split the path into components
-    std::vector<std::string> components = splitPath(path);
-
-    // Start at the root of the file system
-    FileNode* node = root_;
-
-    // Iterate through the path components
-    for (const std::string& component : components) {
-        // Check if the component is in the children map
-        auto it = std::find_if(node->children.begin(), node->children.end(), [&](auto* child) {
-            return child->file->getName() == component;
-        });
-        if (it != node->children.end()) {
-            // The component was found, move to the next node
-            node = *it;
-        } else {
-            // The component was not found, return nullptr
-            return nullptr;
-        }
-    }
-    return node;
 }
 
 // void FileSystem::mount(const std::string& path, FileSystem& fs) {

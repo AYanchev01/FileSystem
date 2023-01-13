@@ -1,6 +1,7 @@
 #pragma once
 #include "utils.h"
-#include <unordered_map>
+#include "File.h"
+#include <vector>
 
 class Directory : public File {
 public:
@@ -9,16 +10,17 @@ public:
             std::time_t last_metadata_change, int hard_link_count, int size, Directory* parent = nullptr);
 
   // Add a file or directory to this directory
-  void addEntry(FileNode* entry);
+  void addEntry(File* entry);
 
   // Remove a file or directory from this directory
   void removeEntry(const std::string& name);
 
   // Get a file or directory from this directory
-  FileNode* getEntry(const std::string& name) const;
+  File* getEntry(const std::string& name) const;
 
   // Get a reference to the children of this directory
-  std::unordered_map<std::string, FileNode*>& getChildren();
+  std::vector<File*>& getChildren();
+
 
   // Get the parent of this directory
   Directory* getParent() const;
@@ -27,6 +29,7 @@ public:
   bool isEmpty() const;
 
 private:
-  std::unordered_map<std::string, FileNode*> entries_;
+  //std::unordered_map<std::string, FileNode*> entries_;
+  std::vector<File*> entries_;
   Directory* parent_;
 };

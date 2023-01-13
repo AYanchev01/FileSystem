@@ -9,6 +9,7 @@
 #include <ctime>
 #include <string>
 #include <vector>
+#include <iostream>
 
 
 // Forward declaration of the File class
@@ -37,10 +38,8 @@ public:
   // Get a file from the file system tree
   File* getFile(const std::string& path) const;
 
-  FileNode* getFileNode(const std::string& path);
-
   // Get the root directory
-  FileNode*& getRootDirectory();
+  Directory*& getRootDirectory();
 
   // void mount(const std::string& path, FileSystem& fs);
 
@@ -48,10 +47,10 @@ public:
 
 public:
   // Recursively delete all the nodes in a subtree
-  void deleteNode(FileNode*& node);
+  void deleteEntry(File*& node);
   std::vector<std::string> splitPath(const std::string& path) const;
 
-  FileNode* root_;  // The root directory of the file system tree
-  FileNode* cwd_;  // The current working directory
+  Directory* root_;  // The root directory of the file system tree
+  Directory* cwd_;  // The current working directory
 };
 
