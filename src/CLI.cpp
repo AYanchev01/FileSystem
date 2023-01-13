@@ -108,12 +108,13 @@ void CLI::cat(const std::vector<std::string>& args) {
           result += line;
         }
         std::cout << result << std::endl;
+        return;
     }
   
     // Get the file from the file system
+    std::string result = "";
     for (int i = 1; i < args.size(); i++)
     {
-      std::string result = "";
       if (args[i] == ">")
       {
         if(i == 1)
@@ -144,10 +145,6 @@ void CLI::cat(const std::vector<std::string>& args) {
         return;
       }
 
-      if(i == args.size())
-      {
-        std::cout << result << std::endl;
-      }
 
       File* file = fs_.getFile(args[i]);
       if (file == nullptr) {
@@ -159,7 +156,13 @@ void CLI::cat(const std::vector<std::string>& args) {
         return;
       }
       RegularFile* reg_file = dynamic_cast<RegularFile*>(file);
+      if(!result.empty()) { result += "\n"; }
       result += reg_file->getContents();
+
+      if(i == args.size() - 1)
+      {
+        std::cout << result << std::endl;
+      }
     }
 }
 
