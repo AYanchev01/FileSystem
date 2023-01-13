@@ -16,23 +16,28 @@ void FileSystem::addFile(File* file, const std::string& path) {
   // Split the path into components
   std::vector<std::string> components = splitPath(path);
   // Find the node to add the file to
-  Directory* node = root_;
-  for (const std::string& component : components) {
+  Directory* parent = nullptr;
+  // Find the target directory
+  if(path[0] == '/') {
+    parent = root_;
+  }else{
+    parent = cwd_;
+  }
+  for (int i = 0; i < components.size() - 1; i++) {
     // Check if the component is in the children vector
-    auto it = node->getEntry(component);
-    if (it != nullptr) {
+    File* child = parent->getEntry(components[i]);
+    if (child != nullptr) {
       // The component was found, move to the next node
-      node = (Directory*) it;
+      parent = (Directory*) child;
     } else {
       // The component was not found, create a new node
       // Use the new constructor of the Directory class, passing the parent directory as an argument
-      Directory* parent = dynamic_cast<Directory*>(node);
-      node->addEntry(new Directory(component, 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, parent));
-      node = (Directory*) node->getChildren().back();
+      parent->addEntry(new Directory(components[i], 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, parent));
+      parent = (Directory*) parent->getChildren().back();
     }
   }
   // Add the file to the current node
-  node->addEntry(file);
+  parent->addEntry(file);
 }
 
 void FileSystem::deleteEntry(File*& node) {
@@ -154,7 +159,7 @@ File* FileSystem::getFile(const std::string& path) const {
     return parent->getEntry(components[0]);
   }
 
-  for (int i = 0; i < components.size() - 2; i++) {
+  for (int i = 0; i < components.size() - 1; i++) {
     if (parent->getType() != Type::DIRECTORY) {
       // The target is not a directory
       std::cout << "Wrong path" << std::endl;

@@ -137,7 +137,7 @@ void CLI::cat(const std::vector<std::string>& args) {
           output_file = fs_.getFile(args[i + 1]);
         }
         if (output_file->getType() != Type::REGULAR_FILE) {
-          std::cout << "Error: not a file" << std::endl;
+          std::cout << "Error: output file is not a file" << std::endl;
           return;
         }
         RegularFile* res = dynamic_cast<RegularFile*>(output_file);
@@ -177,22 +177,42 @@ void CLI::cp(const std::vector<std::string>& args) {
   // Get the destination path
   std::string dest_path = args[args.size() - 1];
 
-  for (int i = 1; i < args.size() - 2; i++)
+  for (int i = 1; i < args.size() - 1; i++)
   {
+    RegularFile* file_to_add = nullptr;
     // Get the source file
     std::string src_path = args[i];
-    File* src_file(fs_.getFile(src_path));
+    File* src_file = fs_.getFile(src_path);
+
     if (src_file == nullptr) {
       std::cout << "cp: source file does not exist" << std::endl;
       return;
     }
 
+    if (src_file->getType() == Type::REGULAR_FILE)
+    {
+      file_to_add = new RegularFile(src_file->getName(), src_file->getSerialNum(), src_file->getLastAccessTime(), src_file->getLastDataChangeTime(),
+        src_file->getLastMetadataChangeTime(), src_file->getHardLinkCount(), src_file->getSize(), Type::REGULAR_FILE);
+      file_to_add->setContents(dynamic_cast<RegularFile*>(src_file)->getContents());
+    }
+    else
+    {
+      std::cout << "cp: source file can only be a regular file or a symbolic link" << std::endl;
+      return;
+    }
+
+
     // Check if the destination path is a directory
     File* dest_file = fs_.getFile(dest_path);
+
+
     if (dest_file != nullptr && dest_file->getType() == Type::DIRECTORY) {
       // The destination is a directory, append the source file name
       dest_path += '/';
       dest_path += src_file->getName();
+    }else{
+      std::cout << "The destination is not a directory" << std::endl;
+      return;
     }
 
     // Check if the destination file already exists
@@ -202,8 +222,10 @@ void CLI::cp(const std::vector<std::string>& args) {
       return;
     }
 
-    // Add the source file to the file system tree with the new name
-    fs_.addFile(src_file, dest_path);
+    std::cout << "Adding file " << file_to_add->getName() << " to " << dest_path << std::endl;
+    std::cout << "File contents: " << file_to_add->getContents() << std::endl;
+    std::cout << "File type: " << (int) file_to_add->getType() << std::endl;
+    fs_.addFile(file_to_add, dest_path);
   }
 }
 
@@ -244,7 +266,7 @@ void CLI::mkdir(const std::vector<std::string>& args) {
     parent = fs_.cwd_;
   }
 
-  for (int i = 0; i < components.size() - 2; i++) {
+  for (int i = 0; i < components.size() - 1; i++) {
     if (parent->getType() != Type::DIRECTORY) {
       std::cout << "Error: " << components[i] << "is not a directory!" << std::endl;
       return;

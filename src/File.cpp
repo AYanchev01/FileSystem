@@ -4,10 +4,7 @@ File::File(const std::string& name, int serial_num, std::time_t last_access, std
      std::time_t last_metadata_change, int hard_link_count, int size, Type type) : name_(name), serial_num_(serial_num),
         last_access_(last_access), last_data_change_(last_data_change), last_metadata_change_(last_metadata_change),
         hard_link_count_(hard_link_count), size_(size), type_(type) { }
-     
-File::File(const File& file) : name_(file.name_), serial_num_(file.serial_num_), last_access_(file.last_access_),
-        last_data_change_(file.last_data_change_), last_metadata_change_(file.last_metadata_change_),
-        hard_link_count_(file.hard_link_count_), size_(file.size_), type_(file.type_) { }
+
 
 // Getters
 std::string File::getName() const {
