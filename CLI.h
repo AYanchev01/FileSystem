@@ -32,9 +32,6 @@ private:
   // Copy a file
   void cp(const std::vector<std::string>& args);
 
-  // Move or rename a file
-  void mv(const std::vector<std::string>& args);
-
   // Remove a file
   void rm(const std::vector<std::string>& args);
 

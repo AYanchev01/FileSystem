@@ -3,6 +3,7 @@
 #include "File.h"
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
 class Directory : public File {
 public:

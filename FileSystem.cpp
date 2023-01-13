@@ -120,7 +120,7 @@ void FileSystem::changeDirectory(const std::string& path) {
 
 std::string FileSystem::getCurrentDirectory() const {
   // Recursively build the path to the current working directory
-  std::string path;
+  std::string path = "/";
   Directory* node = cwd_;
   while (node != root_) {
     if (node->getType() != Type::DIRECTORY) {
@@ -137,6 +137,10 @@ File* FileSystem::getFile(const std::string& path) const {
   // Split the path into components
   std::vector<std::string> components = splitPath(path);
   
+  if(components.empty()) {
+    return this->root_;
+  }
+
   // Find the target file
   Directory* parent = nullptr;
   if (path[0] == '/') {
@@ -145,13 +149,18 @@ File* FileSystem::getFile(const std::string& path) const {
     parent = cwd_;
   }
 
-  for (const std::string& component : components) {
+  if(components.size() == 1)
+  {
+    return parent->getEntry(components[0]);
+  }
+
+  for (int i = 0; i < components.size() - 2; i++) {
     if (parent->getType() != Type::DIRECTORY) {
       // The target is not a directory
       std::cout << "Wrong path" << std::endl;
       return nullptr;
     }
-    parent = (Directory*) parent->getEntry(component);
+    parent = (Directory*) parent->getEntry(components[i]);
   }
   return parent->getEntry(components.back());
 }

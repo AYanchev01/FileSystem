@@ -6,7 +6,7 @@ CLI::CLI(FileSystem& fs) : fs_(fs) {}
 void CLI::run() {
         while (true) {
         // Print the prompt
-        std::cout << fs_.getCurrentDirectory() << " $ ";
+        std::cout << fs_.getCurrentDirectory() << "$ ";
 
         // Read a line of input
         std::string line;
@@ -133,6 +133,7 @@ void CLI::cat(const std::vector<std::string>& args) {
         File* output_file = fs_.getFile(args[i + 1]);
         if (output_file == nullptr) {
           fs_.cwd_->addEntry(new RegularFile(args[i + 1], 0,std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, Type::REGULAR_FILE));
+          output_file = fs_.getFile(args[i + 1]);
         }
         if (output_file->getType() != Type::REGULAR_FILE) {
           std::cout << "Error: not a file" << std::endl;
