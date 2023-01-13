@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "RegularFile.h"
 
 
 // Forward declaration of the File class

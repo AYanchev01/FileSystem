@@ -84,14 +84,37 @@ void FileSystem::deleteFile(const std::string& path) {
 void FileSystem::changeDirectory(const std::string& path) {
   // Split the path into components
   std::vector<std::string> components = splitPath(path);
-
+  Directory* target = nullptr;
   // Find the target directory
-  Directory* target = cwd_;
+  if(path[0] == '/') {
+    target = root_;
+  }else{
+    target = cwd_;
+  }
   for (const std::string& component : components) {
+    if (target->getType() != Type::DIRECTORY) {
+      // The target is not a directory
+      std::cout << "Directory not found: " << component << std::endl;
+      return;
+    }
+    if(component == ".") {
+      continue;
+    }
+    if(component == "..") {
+      target = target->getParent();
+      if (target == nullptr) {
+        std::cout << "Directory not found: " << path << std::endl;
+        return;
+      }
+      continue;
+    }
     target = (Directory*) target->getEntry(component);
+    if(target == nullptr) {
+      std::cout << "Directory not found: " << component << std::endl;
+      return;
+    }
   }
 
-  // Set the target as the current working directory
   cwd_ = target;
 }
 
@@ -113,9 +136,15 @@ std::string FileSystem::getCurrentDirectory() const {
 File* FileSystem::getFile(const std::string& path) const {
   // Split the path into components
   std::vector<std::string> components = splitPath(path);
-
+  
   // Find the target file
-  Directory* parent = cwd_;
+  Directory* parent = nullptr;
+  if (path[0] == '/') {
+    parent = root_;
+  } else {
+    parent = cwd_;
+  }
+
   for (const std::string& component : components) {
     if (parent->getType() != Type::DIRECTORY) {
       // The target is not a directory

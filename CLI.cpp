@@ -55,70 +55,113 @@ void CLI::run() {
 }
 
 void CLI::cd(const std::vector<std::string>& args) {
-    if (args.size() != 1) {
+    if (args.size() != 2) {
         std::cout << "Usage: cd <directory>" << std::endl;
         return;
     }
-    FileNode* fileNode = fs_.getFileNode(args[0]);
-    if (fileNode == nullptr) {
-        std::cout << "Directory not found: " << args[0] << std::endl;
-        return;
-    }
-    Directory* dir = dynamic_cast<Directory*>(fileNode->file);
-    if (dir == nullptr) {
-        std::cout << args[0] << " is not a directory" << std::endl;
-        return;
-    }
-    fs_.cwd_ = fileNode;
+    fs_.changeDirectory(args[1]);
 }
 
 
 void CLI::pwd() {
-  std::cout << fs_.cwd_->file->getName() << std::endl;
+  std::cout << fs_.getCurrentDirectory() << std::endl;
 }
 
 void CLI::ls(const std::vector<std::string>& args) {
   // Get the path to the directory to list
   std::string path;
-  if (args.empty()) {
+  if (args.empty())
+  {
+    return;
+  }
+  if (args.size() == 1) {
     // No path was specified, use the current working directory
     path = fs_.getCurrentDirectory();
   } else {
     // Use the specified path
-    path = args[0];
+    path = args[1];
   }
 
   // Get the directory to list
   File* file = fs_.getFile(path);
-  Directory* dir = dynamic_cast<Directory*>(file);
-  if (dir == nullptr) {
-    // The specified path is not a directory
-    std::cout << path << " is not a directory" << std::endl;
+  if (file->getType() != Type::DIRECTORY) {
+    std::cout << "Error: not a directory" << std::endl;
     return;
   }
-
+  Directory* dir = dynamic_cast<Directory*>(file);
   // Print the names of the files in the directory
-  for (const auto& [name, child] : dir->getChildren()) {
-    std::cout << name << " ";
+  for (auto child : dir->getChildren()) {
+    std::cout << child->getName() << " ";
   }
   std::cout << std::endl;
 }
 
 void CLI::cat(const std::vector<std::string>& args) {
-    if (args.size() != 1) {
-    std::cout << "Error: cat requires 1 argument" << std::endl;
-    return;
+    if (args.empty())
+    {
+      return;
     }
-
+    if (args.size() == 1) {
+      std::string result = "";
+        std::string line;
+        while (true) {
+          std::getline(std::cin, line);
+          if (line == ".") break;
+          result += line;
+        }
+        std::cout << result << std::endl;
+    }
+  
     // Get the file from the file system
-    File* file = fs_.getFile(args[0]);
-    if (file == nullptr) {
-    std::cout << "Error: file not found" << std::endl;
-    return;
-    }
+    for (int i = 1; i < args.size(); i++)
+    {
+      std::string result = "";
+      if (args[i] == ">")
+      {
+        if(i == 1)
+        {
+          std::string line;
+          while (true) {
+            std::getline(std::cin, line);
+            if (line == ".") break;
+            result += line;
+          }
+        }
+        if (i + 1 >= args.size())
+        {
+          std::cout << "Error: missing output file" << std::endl;
+          return;
+        }
+        File* output_file = fs_.getFile(args[i + 1]);
+        if (output_file == nullptr) {
+          fs_.cwd_->addEntry(new RegularFile(args[i + 1], 0,std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, Type::REGULAR_FILE));
+        }
+        if (output_file->getType() != Type::REGULAR_FILE) {
+          std::cout << "Error: not a file" << std::endl;
+          return;
+        }
+        RegularFile* res = dynamic_cast<RegularFile*>(output_file);
+        res->setContents(result);
+        return;
+      }
 
-    // Print the contents of the file
-    //std::cout << file->getContents() << std::endl;
+      if(i == args.size())
+      {
+        std::cout << result << std::endl;
+      }
+
+      File* file = fs_.getFile(args[i]);
+      if (file == nullptr) {
+        std::cout << "Error: file not found" << std::endl;
+        return;
+      }
+      if (file->getType() != Type::REGULAR_FILE) {
+        std::cout << "Error: not a file" << std::endl;
+        return;
+      }
+      RegularFile* reg_file = dynamic_cast<RegularFile*>(file);
+      result += reg_file->getContents();
+    }
 }
 
 void CLI::cp(const std::vector<std::string>& args) {
