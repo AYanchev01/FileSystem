@@ -143,6 +143,7 @@ void CLI::cat(const std::vector<std::string>& args) {
         }
         RegularFile* res = dynamic_cast<RegularFile*>(output_file);
         res->setContents(result);
+        res->setSize(result.size());
         return;
       }
 
@@ -434,7 +435,7 @@ void CLI::ln(const std::vector<std::string>& args) {
     return;
   }
 
-  File* symlink = new SymLink(dst_components.back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, src_file);
+  File* symlink = new SymLink(dst_components.back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), sizeof(File*), src_file);
 
   if (dst_components.size() == 1) {
     fs_.addFile(symlink, dst_path);
