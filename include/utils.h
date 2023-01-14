@@ -5,5 +5,4 @@ enum class Type {
   DIRECTORY,
   SYMLINK,
   HARDLINK,
-  NAMED_PIPE,
 };

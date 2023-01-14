@@ -411,14 +411,17 @@ void CLI::rmdir(const std::vector<std::string>& args) {
 }
 
 void CLI::ln(const std::vector<std::string>& args) {
-  if (args.size() != 3) {
-    std::cout << "Usage: ln <src> <dst>" << std::endl;
+  if (args.size() != 4) {
+    std::cout << "Usage: ln -s <src> <dst>" << std::endl;
+    return;
+  }else if(args[1] != "-s"){
+    std::cout << "Usage: ln -s <src> <dst>" << std::endl;
     return;
   }
 
   // Get the source and destination paths
-  const std::string& src_path = args[1];
-  const std::string& dst_path = args[2];
+  const std::string& src_path = args[2];
+  const std::string& dst_path = args[3];
   std::vector<std::string> dst_components = fs_.splitPath(dst_path);
 
   // Get the source file
