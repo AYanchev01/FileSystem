@@ -134,7 +134,7 @@ void CLI::cat(const std::vector<std::string>& args) {
         }
         File* output_file = fs_.getFile(args[i + 1]);
         if (output_file == nullptr) {
-          fs_.addFile(new RegularFile((fs_.splitPath(args[i + 1])).back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 0, Type::REGULAR_FILE), args[i + 1]);
+          fs_.addFile(new RegularFile((fs_.splitPath(args[i + 1])).back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), result.size(), Type::REGULAR_FILE), args[i + 1]);
           output_file = fs_.getFile(args[i + 1]);
         }
         if (output_file->getType() != Type::REGULAR_FILE) {
@@ -143,7 +143,6 @@ void CLI::cat(const std::vector<std::string>& args) {
         }
         RegularFile* res = dynamic_cast<RegularFile*>(output_file);
         res->setContents(result);
-        res->setSize(result.size());
         return;
       }
 
