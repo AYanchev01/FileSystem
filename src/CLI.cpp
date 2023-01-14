@@ -210,6 +210,23 @@ void CLI::cp(const std::vector<std::string>& args) {
         src_file->getLastMetadataChangeTime(), src_file->getHardLinkCount(), src_file->getSize(), Type::REGULAR_FILE);
       file_to_add->setContents(dynamic_cast<RegularFile*>(src_file)->getContents());
     }
+    else if (src_file->getType() == Type::SYMLINK && dynamic_cast<SymLink*>(src_file)->getTarget()->getType() == Type::REGULAR_FILE)
+    {
+      src_file = dynamic_cast<SymLink*>(src_file)->getTarget();
+      file_to_add = new RegularFile(src_file->getName(), src_file->getSerialNum(), src_file->getLastAccessTime(), src_file->getLastDataChangeTime(),
+        src_file->getLastMetadataChangeTime(), src_file->getHardLinkCount(), src_file->getSize(), Type::REGULAR_FILE);
+      file_to_add->setContents(dynamic_cast<RegularFile*>(src_file)->getContents());
+    }
+    else
+    {
+      std::cout << "cp: source file can only be a regular file or a symbolic link to a regular file." << std::endl;
+      return;
+    }
+    {
+      file_to_add = new SymLink(src_file->getName(), src_file->getSerialNum(), src_file->getLastAccessTime(), src_file->getLastDataChangeTime(),
+        src_file->getLastMetadataChangeTime(), src_file->getHardLinkCount(), src_file->getSize(), Type::SYMLINK);
+      dynamic_cast<SymLink*>(file_to_add)->setTarget(dynamic_cast<SymLink*>(src_file)->getTarget());
+    }
     else
     {
       std::cout << "cp: source file can only be a regular file or a symbolic link" << std::endl;
