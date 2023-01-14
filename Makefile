@@ -10,11 +10,13 @@ OBJECTS = $(SOURCES:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 
 all: build
 
-build: $(OBJECTS)
+build: checkdir $(OBJECTS)
 	$(CC) $(OBJECTS) -o main.exe
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
+checkdir:
 	if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) $(CFLAGS) -I $(INCLUDE_DIR) -c $< -o $@
 
 clean:
