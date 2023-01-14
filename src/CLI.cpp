@@ -230,7 +230,7 @@ void CLI::cp(const std::vector<std::string>& args) {
       std::cout << "cp: source file does not exist" << std::endl;
       return;
     }
-    
+
     if (src_file->getType() != Type::REGULAR_FILE) 
     {
       if (src_file->getType() == Type::SYMLINK)
@@ -279,7 +279,12 @@ void CLI::cp(const std::vector<std::string>& args) {
       // The destination is a directory, append the source file name
       dest_path += '/';
       dest_path += src_file->getName();
-    }else if (dest_file == nullptr && path_is_valid && dest_path.back() != '/') {
+    }else if (dest_file != nullptr && dest_file->getType() != Type::DIRECTORY) {
+      // The destination is not a directory and it already exists
+      std::cout << "cp: destination file already exists" << std::endl;
+      return;
+    }
+    else if (dest_file == nullptr && path_is_valid && dest_path.back() != '/') {
       // The destination includes the new file name and its parent is a directory
       // Nothing to be done
       file_to_add->setName(components.back());
@@ -447,26 +452,29 @@ void CLI::ln(const std::vector<std::string>& args) {
 
 void CLI::stat(const std::vector<std::string>& args) {
   // Check if a file was specified
-  if (args .size() != 2) {
-    std::cout << "Usage: stat <file>" << std::endl;
+  if (args .size() < 2) {
+    std::cout << "Usage: stat <file> [<file> ... <file>]" << std::endl;
     return;
   }
 
-  // Get the file from the file system
-  File* file = fs_.getFile(args[1]);
-  if (file == nullptr) {
-    std::cout << "Error: File not found" << std::endl;
-    return;
-  }
+  for (size_t i = 1; i < args.size(); i++)
+  {
+    // Get the file from the file system
+    File* file = fs_.getFile(args[i]);
+    if (file == nullptr) {
+      std::cout << "Error: File not found" << std::endl;
+      return;
+    }
 
-  // Print the file's information
-  std::cout << "Name: " << file->getName() << std::endl;
-  std::cout << "Serial number: " << file->getSerialNum() << std::endl;
-  std::cout << "Last access: " << file->getLastAccessTime() << std::endl;
-  std::cout << "Last data change: " << file->getLastDataChangeTime() << std::endl;
-  std::cout << "Last metadata change: " << file->getLastMetadataChangeTime() << std::endl;
-  std::cout << "Hard link count: " << file->getHardLinkCount() << std::endl;
-  std::cout << "Size: " << file->getSize() << std::endl;
+    // Print the file's information
+    std::cout << "Name: " << file->getName() << std::endl;
+    std::cout << "Serial number: " << file->getSerialNum() << std::endl;
+    std::cout << "Last access: " << file->getLastAccessTime() << std::endl;
+    std::cout << "Last data change: " << file->getLastDataChangeTime() << std::endl;
+    std::cout << "Last metadata change: " << file->getLastMetadataChangeTime() << std::endl;
+    std::cout << "Hard link count: " << file->getHardLinkCount() << std::endl;
+    std::cout << "Size: " << file->getSize() << std::endl;
+  }
 }
 
 // void CLI::mount(const std::vector<std::string>& args) {
