@@ -1,8 +1,8 @@
 #include "../include/Directory.h"
 
 Directory::Directory(const std::string& name, int serial_num, std::time_t last_access, std::time_t last_data_change,
-            std::time_t last_metadata_change, int hard_link_count, int size, Directory* parent)
-      : File(name, serial_num, last_access, last_data_change, last_metadata_change, hard_link_count, size, Type::DIRECTORY),
+            std::time_t last_metadata_change, int size, Directory* parent)
+      : File(name, serial_num, last_access, last_data_change, last_metadata_change, size, Type::DIRECTORY),
         parent_(parent) {}
 
 void Directory::addEntry(File* entry) {

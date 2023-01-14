@@ -134,7 +134,7 @@ void CLI::cat(const std::vector<std::string>& args) {
         }
         File* output_file = fs_.getFile(args[i + 1]);
         if (output_file == nullptr) {
-          fs_.addFile(new RegularFile((fs_.splitPath(args[i + 1])).back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, Type::REGULAR_FILE), args[i + 1]);
+          fs_.addFile(new RegularFile((fs_.splitPath(args[i + 1])).back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 0, Type::REGULAR_FILE), args[i + 1]);
           output_file = fs_.getFile(args[i + 1]);
         }
         if (output_file->getType() != Type::REGULAR_FILE) {
@@ -263,7 +263,7 @@ void CLI::cp(const std::vector<std::string>& args) {
     }
 
     file_to_add = new RegularFile(src_file->getName(), src_file->getSerialNum(), src_file->getLastAccessTime(), src_file->getLastDataChangeTime(),
-      src_file->getLastMetadataChangeTime(), src_file->getHardLinkCount(), src_file->getSize(), Type::REGULAR_FILE);
+      src_file->getLastMetadataChangeTime(), src_file->getSize(), Type::REGULAR_FILE);
     file_to_add->setContents(dynamic_cast<RegularFile*>(src_file)->getContents());
 
     // Check if the destination path is a directory
@@ -359,7 +359,7 @@ void CLI::mkdir(const std::vector<std::string>& args) {
 
   // Create the new directory
   Directory* new_dir;
-  new_dir = new Directory(components.back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, parent);
+  new_dir = new Directory(components.back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 0, parent);
   parent->getChildren().push_back(new_dir);
 }
 
@@ -471,42 +471,9 @@ void CLI::stat(const std::vector<std::string>& args) {
     std::cout << "Last access: " << file->getLastAccessTime() << std::endl;
     std::cout << "Last data change: " << file->getLastDataChangeTime() << std::endl;
     std::cout << "Last metadata change: " << file->getLastMetadataChangeTime() << std::endl;
-    std::cout << "Hard link count: " << file->getHardLinkCount() << std::endl;
     std::cout << "Size: " << file->getSize() << std::endl;
   }
 }
-
-// void CLI::mount(const std::vector<std::string>& args) {
-//   if (args.size() != 3) {
-//     std::cout << "Usage: mount <device> <mount point>" << std::endl;
-//     return;
-//   }
-
-//   // Extract the device and mount point from the arguments
-//   std::string device = args[1];
-//   std::string mount_point = args[2];
-
-//   // Mount the device at the specified mount point
-//   if (!fs_.mount(device, mount_point)) {
-//     std::cout << "Error: Failed to mount device" << std::endl;
-//   }
-// }
-
-// void CLI::umount(const std::vector<std::string>& args) {
-//   if (args.size() != 1) {
-//     std::cout << "Invalid number of arguments for umount" << std::endl;
-//     return;
-//   }
-
-//   // Check if the file system is mounted at the given path
-//   if (fs_.isMounted(args[0])) {
-//     // Unmount the file system
-//     fs_.unmount(args[0]);
-//     std::cout << "Successfully unmounted file system at " << args[0] << std::endl;
-//   } else {
-//     std::cout << "No file system is mounted at " << args[0] << std::endl;
-//   }
-// }
 
 std::vector<std::string> CLI::splitLine(const std::string& line) const {
   // Create a vector to store the components of the line

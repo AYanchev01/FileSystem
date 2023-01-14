@@ -2,7 +2,7 @@
 
 FileSystem::FileSystem() {
   // Create the root directory and set it as the current working directory
-  root_ = new Directory("/", 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, nullptr);
+  root_ = new Directory("/", 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 0, nullptr);
   cwd_ = root_;
 }
 
@@ -33,7 +33,7 @@ void FileSystem::addFile(File* file, const std::string& path) {
       // The component was not found, create a new node
       // Use the new constructor of the Directory class, passing the parent directory as an argument
       std::cout << "Creating directory: " << components[i] << std::endl;
-      parent->addEntry(new Directory(components[i], 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, parent));
+      parent->addEntry(new Directory(components[i], 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 0, parent));
       parent = (Directory*) parent->getChildren().back();
     }
   }
