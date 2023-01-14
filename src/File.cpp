@@ -33,6 +33,7 @@ Type File::getType() const {
 // Setters
 void File::setName(const std::string& name) {
     name_ = name;
+    this->setLastMetadataChangeTime(std::time(nullptr));
 }
 void File::setLastAccessTime(std::time_t last_access) {
     last_access_ = last_access;
@@ -46,6 +47,7 @@ void File::setLastMetadataChangeTime(std::time_t last_metadata_change) {
 
 void File::setSize(int size) {
     size_ = size;
+    this->setLastMetadataChangeTime(std::time(nullptr));
 }
 void File::setType(const Type& type) {
     type_ = type;

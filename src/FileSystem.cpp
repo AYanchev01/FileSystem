@@ -138,6 +138,8 @@ void FileSystem::changeDirectory(const std::string& path) {
   }
 
   cwd_ = target;
+  cwd_->setLastAccessTime(std::time(nullptr));
+  cwd_->setLastMetadataChangeTime(std::time(nullptr));
 }
 
 std::string FileSystem::getCurrentDirectory() const {
@@ -152,6 +154,7 @@ std::string FileSystem::getCurrentDirectory() const {
     path = '/' + node->getName() + path;
     node = node->getParent();
   }
+  node->setLastAccessTime(std::time(nullptr));
   return path;
 }
 

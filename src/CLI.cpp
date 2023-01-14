@@ -88,6 +88,7 @@ void CLI::ls(const std::vector<std::string>& args) {
     return;
   }
   Directory* dir = dynamic_cast<Directory*>(file);
+  dir->setLastAccessTime(std::time(nullptr));
   // Print the names of the files in the directory
   for (auto child : dir->getChildren()) {
     std::cout << child->getName() << " ";
@@ -192,6 +193,7 @@ void CLI::cat(const std::vector<std::string>& args) {
       {
         reg_file = dynamic_cast<RegularFile*>(dynamic_cast<SymLink*>(file)->getTarget());
       }
+      reg_file->setLastAccessTime(std::time(nullptr));
 
       if(!result.empty()) { result += "\n"; }
       result += reg_file->getContents();
@@ -233,6 +235,7 @@ void CLI::cp(const std::vector<std::string>& args) {
       {
         if (dynamic_cast<SymLink*>(src_file)->isBroken())
         {
+          dynamic_cast<SymLink*>(src_file)->setLastAccessTime(std::time(nullptr));
           std::cout << "Error: broken symlink" << src_file->getName() << std::endl;
           return;
         }
@@ -242,6 +245,8 @@ void CLI::cp(const std::vector<std::string>& args) {
           {
             std::cout << "Error: broken symlink"<< src_file->getName() << std::endl;
             dynamic_cast<SymLink*>(src_file)->setBroken(true);
+            dynamic_cast<SymLink*>(src_file)->setLastAccessTime(std::time(nullptr));
+            dynamic_cast<SymLink*>(src_file)->setLastMetadataChangeTime(std::time(nullptr));
             return;
           }
           else if ( dynamic_cast<SymLink*>(src_file)->getTarget()->getType() != Type::REGULAR_FILE)
@@ -252,6 +257,7 @@ void CLI::cp(const std::vector<std::string>& args) {
           else
           {
             src_file = dynamic_cast<SymLink*>(src_file)->getTarget();
+            dynamic_cast<SymLink*>(src_file)->setLastAccessTime(std::time(nullptr));
           }
         }
       }
@@ -261,6 +267,8 @@ void CLI::cp(const std::vector<std::string>& args) {
         return;
       }
     }
+
+    src_file->setLastAccessTime(std::time(nullptr));
 
     file_to_add = new RegularFile(src_file->getName(), src_file->getSerialNum(), src_file->getLastAccessTime(), src_file->getLastDataChangeTime(),
       src_file->getLastMetadataChangeTime(), src_file->getSize(), Type::REGULAR_FILE);
@@ -426,6 +434,7 @@ void CLI::ln(const std::vector<std::string>& args) {
     std::cout << "ln: failed to access '" << src_path << "': No such file or directory" << std::endl;
     return;
   }
+  src_file->setLastAccessTime(std::time(nullptr));
 
   // Check if the destination file already exists
   File* dst_file = fs_.getFile(dst_path);
