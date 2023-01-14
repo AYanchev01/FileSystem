@@ -23,7 +23,7 @@ void FileSystem::addFile(File* file, const std::string& path) {
   }else{
     parent = cwd_;
   }
-  for (int i = 0; i < components.size() - 1; i++) {
+  for (size_t i = 0; i < components.size() - 1; i++) {
     // Check if the component is in the children vector
     File* child = parent->getEntry(components[i]);
     if (child != nullptr) {
@@ -176,7 +176,7 @@ File* FileSystem::getFile(const std::string& path) const {
     return parent->getEntry(components[0]);
   }
 
-  for (int i = 0; i < components.size() - 1; i++) {
+  for (size_t i = 0; i < components.size() - 1; i++) {
     
     if (parent->getType() != Type::DIRECTORY) {
       // The target is not a directory

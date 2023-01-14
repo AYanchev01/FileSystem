@@ -118,7 +118,7 @@ void CLI::cat(const std::vector<std::string>& args) {
   
     // Get the file from the file system
     std::string result = "";
-    for (int i = 1; i < args.size(); i++)
+    for (size_t i = 1; i < args.size(); i++)
     {
       if (args[i] == ">")
       {
@@ -182,7 +182,7 @@ void CLI::cp(const std::vector<std::string>& args) {
   // Get the destination path
   std::string dest_path = args[args.size() - 1];
 
-  for (int i = 1; i < args.size() - 1; i++)
+  for (size_t i = 1; i < args.size() - 1; i++)
   {
     RegularFile* file_to_add = nullptr;
     // Get the source file
@@ -238,7 +238,7 @@ void CLI::rm(const std::vector<std::string>& args) {
     return;
   }
 
-  for(int i = 1; i < args.size(); i++)
+  for(size_t i = 1; i < args.size(); i++)
   {
     // Get the path of the file to delete
     std::string path = args[i];
@@ -268,7 +268,7 @@ void CLI::mkdir(const std::vector<std::string>& args) {
     parent = fs_.cwd_;
   }
 
-  for (int i = 0; i < components.size() - 1; i++) {
+  for (size_t i = 0; i < components.size() - 1; i++) {
     if (parent->getType() != Type::DIRECTORY) {
       std::cout << "Error: " << components[i] << "is not a directory!" << std::endl;
       return;

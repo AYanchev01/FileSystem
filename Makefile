@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -std=c++17
+CFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -Werror -D_FORTIFY_SOURCE=2 -D_GLIBCXX_ASSERTIONS -O2
 
 SRC_DIR = src
 INCLUDE_DIR = include
