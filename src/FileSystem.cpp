@@ -166,6 +166,18 @@ File* FileSystem::getFile(const std::string& path) const {
       std::cout << "Wrong path" << std::endl;
       return nullptr;
     }
+    if(components[i] == ".") {
+      continue;
+    }
+    if(components[i] == "..") {
+      parent = parent->getParent();
+      if (parent == nullptr) {
+        std::cout << "Directory not found" << std::endl;
+        return nullptr;
+      }
+      continue;
+    }
+
     parent = (Directory*) parent->getEntry(components[i]);
     if (parent == nullptr) {
       // The component was not found
