@@ -40,10 +40,6 @@ void CLI::run() {
         ln(components);
         } else if (components[0] == "stat") {
         stat(components);
-        // } else if (components[0] == "mount") {
-        // mount(components);
-        // } else if (components[0] == "umount") {
-        // umount(components);
         } else if (components[0] == "exit") {
         break;
         } else {

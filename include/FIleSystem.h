@@ -42,10 +42,6 @@ public:
   // Get the root directory
   Directory*& getRootDirectory();
 
-  // void mount(const std::string& path, FileSystem& fs);
-
-  // void umount(const std::string& path);
-
 public:
   // Recursively delete all the nodes in a subtree
   void deleteEntry(File* node);
