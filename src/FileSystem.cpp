@@ -32,6 +32,7 @@ void FileSystem::addFile(File* file, const std::string& path) {
     } else {
       // The component was not found, create a new node
       // Use the new constructor of the Directory class, passing the parent directory as an argument
+      std::cout << "Creating directory: " << components[i] << std::endl;
       parent->addEntry(new Directory(components[i], 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, parent));
       parent = (Directory*) parent->getChildren().back();
     }
@@ -60,28 +61,44 @@ void FileSystem::deleteFile(const std::string& path) {
   std::vector<std::string> components = splitPath(path);
 
   // Find the parent directory of the file
-  Directory* parent = cwd_;
-  for (size_t i = 0; i < components.size() - 1; i++) {
-    // Use the new "Directory::getChildren" method to get the children of the current directory
-    auto it = parent->getEntry(components[i]);
-    if (it == nullptr) {
-      // The component was not found
-      std::cout << "The component was not found" << std::endl;
-      return;
-    }
-    parent = dynamic_cast<Directory*>(it);
+  Directory* parent = nullptr;
+  // Find the target directory
+  if(path[0] == '/') {
+    parent = root_;
+  }else{
+    parent = cwd_;
   }
 
+  if (components.size() > 1) {
+    for (size_t i = 0; i < components.size() - 1; i++) {
+      // Use the new "Directory::getChildren" method to get the children of the current directory
+      File* new_parent = parent->getEntry(components[i]);
+      if (new_parent == nullptr || new_parent->getType() != Type::DIRECTORY) {
+        // The component was not found
+        std::cout << "Directory not found: " << components[i] <<std::endl;
+        return;
+      }
+      parent = dynamic_cast<Directory*>(new_parent);
+    }
+  }
   // Find the file to delete
   if (parent != nullptr) {
     // Find the iterator to the file in the parent's children list
     // Use the new "Directory::getChildren" method to get the children of the parent directory
-    auto it = parent->getEntry(components.back());
-    if (it != nullptr) {
-      // Delete the file and remove it from the parent's children list
-      deleteEntry(it);
-      parent->removeEntry(it->getName());
+    File* to_be_deleted = parent->getEntry(components.back());
+    if (to_be_deleted == nullptr) {
+      // The file was not found
+      std::cout << "File not found: " << components.back() << std::endl;
+      return;
     }
+    if (to_be_deleted->getType() == Type::DIRECTORY)
+    {
+      std::cout << "Cannot remove directories with rm. Use rmdir." << std::endl;
+      return;
+    }
+    // Delete the file and remove it from the parent's children list
+    parent->removeEntry(to_be_deleted->getName());
+    deleteEntry(to_be_deleted);
   }
 }
 
