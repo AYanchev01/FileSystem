@@ -209,12 +209,17 @@ void CLI::cp(const std::vector<std::string>& args) {
 
     // Check if the destination path is a directory
     File* dest_file = fs_.getFile(dest_path);
-
+    std::vector<std::string> components = fs_.splitPath(dest_path);
+    bool parent_is_dir = (components.size() <= 1) ? dest_path[0] == '/' : fs_.getFile(components.at(components.size() - 2))->getType() == Type::DIRECTORY;
 
     if (dest_file != nullptr && dest_file->getType() == Type::DIRECTORY) {
       // The destination is a directory, append the source file name
       dest_path += '/';
       dest_path += src_file->getName();
+    }else if (dest_file == nullptr && parent_is_dir && dest_path.back() != '/') {
+      // The destination includes the new file name and its parent is a directory
+      // Nothing to be done
+      file_to_add->setName(components.back());
     }else{
       std::cout << "The destination is not a directory" << std::endl;
       return;
