@@ -48,7 +48,7 @@ public:
 
 public:
   // Recursively delete all the nodes in a subtree
-  void deleteEntry(File*& node);
+  void deleteEntry(File* node);
   std::vector<std::string> splitPath(const std::string& path) const;
   bool isValidPath(const std::string& path) const;
 

@@ -41,17 +41,17 @@ void FileSystem::addFile(File* file, const std::string& path) {
   parent->addEntry(file);
 }
 
-void FileSystem::deleteEntry(File*& node) {
-// Recursively delete all the children of this node
-if (node == nullptr) {
-  return;
-}
-if (node->getType() == Type::DIRECTORY) {
-    Directory* dir = dynamic_cast<Directory*>(node);
-    for (auto& child : dir->getChildren()) {
-      deleteEntry(child);
-    }
+void FileSystem::deleteEntry(File* node) {
+  // Recursively delete all the children of this node
+  if (node == nullptr) {
+    return;
   }
+  if (node->getType() == Type::DIRECTORY) {
+      Directory* dir = dynamic_cast<Directory*>(node);
+      for (auto& child : dir->getChildren()) {
+        deleteEntry(child);
+      }
+    }
   delete node;
   node = nullptr;
 }

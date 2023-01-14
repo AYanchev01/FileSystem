@@ -156,10 +156,37 @@ void CLI::cat(const std::vector<std::string>& args) {
         std::cout << "Error: file not found" << std::endl;
         return;
       }
-      if (file->getType() != Type::REGULAR_FILE && (file->getType() != Type::SYMLINK && dynamic_cast<SymLink*>(file)->getTarget()->getType() != Type::REGULAR_FILE)) {
-        std::cout << "Error: not a file" << std::endl;
-        return;
+      if (file->getType() != Type::REGULAR_FILE) 
+      {
+        if (file->getType() == Type::SYMLINK)
+        {
+          if (dynamic_cast<SymLink*>(file)->isBroken())
+          {
+            std::cout << "Error: broken symlink" << file->getName() << std::endl;
+            return;
+          }
+          else 
+          {
+            if (dynamic_cast<SymLink*>(file)->getTarget() == nullptr)
+            {
+              std::cout << "Error: broken symlink"<< file->getName() << std::endl;
+              dynamic_cast<SymLink*>(file)->setBroken(true);
+              return;
+            }
+            else if ( dynamic_cast<SymLink*>(file)->getTarget()->getType() != Type::REGULAR_FILE)
+            {
+              std::cout << "Error: source should be a file or a symbolic link to a regular file" << std::endl;
+              return;
+            }
+          }
+        }
+        else 
+        {
+          std::cout << "Error: source should be a file or a symbolic link to a regular file" << std::endl;
+          return;
+        }
       }
+
       RegularFile* reg_file = nullptr;
       if (file->getType() == Type::REGULAR_FILE)
       {
@@ -203,15 +230,40 @@ void CLI::cp(const std::vector<std::string>& args) {
       std::cout << "cp: source file does not exist" << std::endl;
       return;
     }
-
-    if (src_file->getType() == Type::SYMLINK && dynamic_cast<SymLink*>(src_file)->getTarget()->getType() == Type::REGULAR_FILE)
+    
+    if (src_file->getType() != Type::REGULAR_FILE) 
     {
-      src_file = dynamic_cast<SymLink*>(src_file)->getTarget();
-    }
-    else if (src_file->getType() != Type::REGULAR_FILE)
-    {
-      std::cout << "cp: source file can only be a regular file or a symbolic link to a regular file." << std::endl;
-      return;
+      if (src_file->getType() == Type::SYMLINK)
+      {
+        if (dynamic_cast<SymLink*>(src_file)->isBroken())
+        {
+          std::cout << "Error: broken symlink" << src_file->getName() << std::endl;
+          return;
+        }
+        else 
+        {
+          if (dynamic_cast<SymLink*>(src_file)->getTarget() == nullptr)
+          {
+            std::cout << "Error: broken symlink"<< src_file->getName() << std::endl;
+            dynamic_cast<SymLink*>(src_file)->setBroken(true);
+            return;
+          }
+          else if ( dynamic_cast<SymLink*>(src_file)->getTarget()->getType() != Type::REGULAR_FILE)
+          {
+            std::cout << "Error: source should be a file or a symbolic link to a regular file" << std::endl;
+            return;
+          }
+          else
+          {
+            src_file = dynamic_cast<SymLink*>(src_file)->getTarget();
+          }
+        }
+      }
+      else 
+      {
+        std::cout << "Error: source should be a file or a symbolic link to a regular file" << std::endl;
+        return;
+      }
     }
 
     file_to_add = new RegularFile(src_file->getName(), src_file->getSerialNum(), src_file->getLastAccessTime(), src_file->getLastDataChangeTime(),
