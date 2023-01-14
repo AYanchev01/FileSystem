@@ -82,6 +82,11 @@ void CLI::ls(const std::vector<std::string>& args) {
 
   // Get the directory to list
   File* file = fs_.getFile(path);
+  if (file == nullptr) {
+    std::cout << "Error: no such file or directory" << std::endl;
+    return;
+  }
+
   if (file->getType() != Type::DIRECTORY) {
     std::cout << "Error: not a directory" << std::endl;
     return;
