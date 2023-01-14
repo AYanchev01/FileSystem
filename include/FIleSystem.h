@@ -50,6 +50,7 @@ public:
   // Recursively delete all the nodes in a subtree
   void deleteEntry(File*& node);
   std::vector<std::string> splitPath(const std::string& path) const;
+  bool isValidPath(const std::string& path) const;
 
   Directory* root_;  // The root directory of the file system tree
   Directory* cwd_;  // The current working directory

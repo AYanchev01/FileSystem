@@ -295,3 +295,29 @@ std::vector<std::string> FileSystem::splitPath(const std::string& path) const{
   }
   return components;
 }
+
+bool FileSystem::isValidPath(const std::string& path) const {
+  // Split the path into components
+  std::vector<std::string> components = splitPath(path);
+
+  // Find the target file
+  Directory* parent = nullptr;
+  if (path[0] == '/') {
+    parent = root_;
+  } else {
+    parent = cwd_;
+  }
+
+  for (size_t i = 0; i < components.size() - 2; i++) {
+    if (parent->getType() != Type::DIRECTORY) {
+      // The target is not a directory
+      return false;
+    }
+    parent = (Directory*) parent->getEntry(components[i]);
+    if (parent == nullptr) {
+      // The component was not found
+      return false;
+    }
+  }
+  return true;
+}

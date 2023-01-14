@@ -36,8 +36,8 @@ void CLI::run() {
         mkdir(components);
         } else if (components[0] == "rmdir") {
         rmdir(components);
-        // } else if (components[0] == "ln") {
-        // ln(components);
+        } else if (components[0] == "ln") {
+        ln(components);
         } else if (components[0] == "stat") {
         stat(components);
         // } else if (components[0] == "mount") {
@@ -156,17 +156,27 @@ void CLI::cat(const std::vector<std::string>& args) {
         std::cout << "Error: file not found" << std::endl;
         return;
       }
-      if (file->getType() != Type::REGULAR_FILE) {
+      if (file->getType() != Type::REGULAR_FILE && (file->getType() != Type::SYMLINK && dynamic_cast<SymLink*>(file)->getTarget()->getType() != Type::REGULAR_FILE)) {
         std::cout << "Error: not a file" << std::endl;
         return;
       }
-      RegularFile* reg_file = dynamic_cast<RegularFile*>(file);
+      RegularFile* reg_file = nullptr;
+      if (file->getType() == Type::REGULAR_FILE)
+      {
+        reg_file = dynamic_cast<RegularFile*>(file);
+      }
+      else
+      {
+        reg_file = dynamic_cast<RegularFile*>(dynamic_cast<SymLink*>(file)->getTarget());
+      }
+
       if(!result.empty()) { result += "\n"; }
       result += reg_file->getContents();
 
       if(i == args.size() - 1)
       {
         std::cout << result << std::endl;
+        return;
       }
     }
 }
@@ -210,13 +220,13 @@ void CLI::cp(const std::vector<std::string>& args) {
     // Check if the destination path is a directory
     File* dest_file = fs_.getFile(dest_path);
     std::vector<std::string> components = fs_.splitPath(dest_path);
-    bool parent_is_dir = (components.size() <= 1) ? dest_path[0] == '/' : fs_.getFile(components.at(components.size() - 2))->getType() == Type::DIRECTORY;
+    bool path_is_valid = (components.size() <= 1) ? dest_path[0] == '/' : fs_.isValidPath(dest_path);
 
     if (dest_file != nullptr && dest_file->getType() == Type::DIRECTORY) {
       // The destination is a directory, append the source file name
       dest_path += '/';
       dest_path += src_file->getName();
-    }else if (dest_file == nullptr && parent_is_dir && dest_path.back() != '/') {
+    }else if (dest_file == nullptr && path_is_valid && dest_path.back() != '/') {
       // The destination includes the new file name and its parent is a directory
       // Nothing to be done
       file_to_add->setName(components.back());
@@ -342,41 +352,45 @@ void CLI::rmdir(const std::vector<std::string>& args) {
   delete dir;
 }
 
-// void CLI::ln(const std::vector<std::string>& args) {
-//   if (args.size() != 3) {
-//     std::cout << "Usage: ln <src> <dst>" << std::endl;
-//     return;
-//   }
+void CLI::ln(const std::vector<std::string>& args) {
+  if (args.size() != 3) {
+    std::cout << "Usage: ln <src> <dst>" << std::endl;
+    return;
+  }
 
-//   // Get the source and destination paths
-//   const std::string& src_path = args[1];
-//   const std::string& dst_path = args[2];
+  // Get the source and destination paths
+  const std::string& src_path = args[1];
+  const std::string& dst_path = args[2];
+  std::vector<std::string> dst_components = fs_.splitPath(dst_path);
 
-//   // Get the source file
-//   File* src_file = fs_.getFile(src_path);
-//   if (src_file == nullptr) {
-//     std::cout << "ln: failed to access '" << src_path << "': No such file or directory" << std::endl;
-//     return;
-//   }
+  // Get the source file
+  File* src_file = fs_.getFile(src_path);
+  if (src_file == nullptr) {
+    std::cout << "ln: failed to access '" << src_path << "': No such file or directory" << std::endl;
+    return;
+  }
 
-//   // Check if the destination is a directory
-//   Directory* dst_dir = dynamic_cast<Directory*>(fs_.getFile(dst_path));
-//   if (dst_dir != nullptr) {
-//     // The destination is a directory, create the symbolic link in the directory
-//     // Use the source file's name as the symbolic link name
-//     dst_dir->addEntry(new FileNode{new SymLink(src_file->getName(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0,src_file),{}});
-//   } else {
-//     // The destination is not a directory, create the symbolic link at the specified path
-//     // Get the parent directory of the destination
-//     std::vector<std::string> dst_components = splitPath(dst_path);
-//     FileNode* dst_parent = fs_.cwd_;
-//     for (size_t i = 0; i < dst_components.size() - 1; i++) {
-//       dst_parent = &dst_parent->children[dst_components[i]];
-//     }
-//     // Add the symbolic link to the parent directory
-//     dst_parent->children.emplace_back(FileNode{new SymLink(dst_components.back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, src_file), {}});
-//   }
-// }
+  // Check if the destination file already exists
+  File* dst_file = fs_.getFile(dst_path);
+  if (dst_file != nullptr) {
+    std::cout << "ln: failed to create hard link '" << dst_path << "': File exists" << std::endl;
+    return;
+  }
+
+  File* symlink = new SymLink(dst_components.back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 1, 0, src_file);
+
+  if (dst_components.size() == 1) {
+    fs_.addFile(symlink, dst_path);
+  }
+  else if (dst_components.size() > 1 && fs_.isValidPath(dst_path))
+  {
+    fs_.addFile(symlink, dst_path);
+  }
+  else {
+    std::cout << "ln: failed to create symbolic link '" << dst_path << "': Invalid path." << std::endl;
+    return;
+  }
+}
 
 void CLI::stat(const std::vector<std::string>& args) {
   // Check if a file was specified
