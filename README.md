@@ -4,7 +4,7 @@
 
 1. Install make for Windows
 2. Install g++ for Windows
-3. run "make" in the root folder of the project
+3. run ```make``` in the root folder of the project
 ### The project can also be built with just using:
   ```g++ src/* -std=c++17 -o main.exe```
 
