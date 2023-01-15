@@ -510,7 +510,7 @@ void CLI::ln(const std::vector<std::string>& args) {
   // Check if the destination file already exists
   File* dst_file = fs_.getFile(dst_path);
   if (dst_file != nullptr) {
-    std::cout << "ln: failed to create hard link '" << dst_path << "': File exists" << std::endl;
+    std::cout << "ln: failed to create symbolic link '" << dst_path << "': File exists" << std::endl;
     return;
   }
 
