@@ -49,5 +49,5 @@ public:
   // Split a line into components
   std::vector<std::string> splitLine(const std::string& line) const;
 
-  FileSystem& fs_;  // The file system
+  FileSystem& fs_;
 };

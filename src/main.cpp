@@ -9,12 +9,19 @@ int main(int argc, char* argv[]) {
   // Create the command-line interface
   CLI cli(fs);
 
-  if (argc > 1 && std::string(argv[1]) == "--test") {
-    // Run the tests
-    runTests();
-  } else {
+  if (argc == 1)
+  {
     // Run the command-line interface
     cli.run();
+  }
+  else if (argc == 2 && std::string(argv[1]) == "--test")
+  {
+    // Run the tests
+    runTests();
+  }
+  else
+  {
+    std::cout << "Usage: .\\main.exe [--test]" << std::endl;
   }
 
   return 0;

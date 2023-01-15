@@ -135,14 +135,12 @@ std::string CLI::cat(const std::vector<std::string>& args) {
     if (args.size() == 1) {
       // No files passed, read from stdin and print to stdout
 
-        //std::string result = "";
         std::string line;
         while (true) {
           std::getline(std::cin, line);
           if (line == ".") break;
           result += line;
         }
-        //std::cout << result << std::endl;
         return result;
     }
 
@@ -239,7 +237,7 @@ std::string CLI::cat(const std::vector<std::string>& args) {
         return result;
       }
     }
-    return result;
+    return result; // Should never reach this point. Just to avoid warnings
 }
 
 

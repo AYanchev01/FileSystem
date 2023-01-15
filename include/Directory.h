@@ -31,7 +31,6 @@ public:
   bool isEmpty() const;
 
 private:
-  //std::unordered_map<std::string, FileNode*> entries_;
   std::vector<File*> entries_;
   Directory* parent_;
 };

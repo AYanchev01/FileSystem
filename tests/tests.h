@@ -1,7 +1,7 @@
 #pragma once
-#include "CLI.h"
-#include "FileSystem.h"
 #include <iostream>
+#include "../include/CLI.h"
+#include "../include/FileSystem.h"
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
 
@@ -98,21 +98,13 @@ TEST_CASE("Test 5: Test changeDirectory and getCurrentDirectory")
     fs.addFile(new RegularFile("file3", 5, std::time(nullptr), std::time(nullptr), std::time(nullptr), 30), "/dir1/dir2/file3");
 
     fs.changeDirectory("/");
-
     CHECK(fs.getCurrentDirectory() == "/");
-
     fs.changeDirectory("dir1");
-
     CHECK(fs.getCurrentDirectory() == "/dir1/");
-
     fs.changeDirectory("dir2");
-
     CHECK(fs.getCurrentDirectory() == "/dir1/dir2/");
-
     fs.changeDirectory("..");
-
     CHECK(fs.getCurrentDirectory() == "/dir1/");
-
     fs.changeDirectory("..");
     CHECK(fs.getCurrentDirectory() == "/");
 }
