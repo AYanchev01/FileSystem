@@ -11,6 +11,11 @@ Directory::Directory(const std::string& name, int serial_num, std::time_t last_a
  * 
  */
 void Directory::addEntry(File* entry) {
+  
+  if(entry == nullptr) {
+    std::cout << "Invalid file" << std::endl;
+    return;
+  }
   entries_.push_back(entry);
   this->setSize(this->getSize() + entry->getSize());
 }

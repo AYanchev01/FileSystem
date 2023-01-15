@@ -79,6 +79,11 @@ Type File::getType() const {
  * @param name 
  */
 void File::setName(const std::string& name) {
+    if (name.empty())
+    {
+        std::cout << "Error: File name cannot be empty" << std::endl;
+        return;
+    }
     name_ = name;
     this->setLastMetadataChangeTime(std::time(nullptr));
 }
@@ -116,6 +121,11 @@ void File::setLastMetadataChangeTime(std::time_t last_metadata_change) {
  * @param size 
  */
 void File::setSize(int size) {
+    if (size < 0)
+    {
+        std::cout << "Error: File size cannot be negative" << std::endl;
+        return;
+    }
     size_ = size;
     this->setLastMetadataChangeTime(std::time(nullptr));
 }

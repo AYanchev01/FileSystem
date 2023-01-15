@@ -29,6 +29,11 @@ bool SymLink::isBroken() const {
  * @param target - the target of the SymLink
  */
 void SymLink::setTarget(File* target) {
+  if(target == nullptr)
+  {
+    std::cout << "Error: Target is nullptr" << std::endl;
+    return;
+  }
   target_ = target;
 }
 

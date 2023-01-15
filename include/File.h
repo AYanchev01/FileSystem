@@ -3,6 +3,7 @@
 #include <ctime>
 #include <vector>
 #include "utils.h"
+#include <iostream>
 
 enum class Type;
 
