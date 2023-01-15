@@ -257,10 +257,10 @@ void CLI::cp(const std::vector<std::string>& args) {
   }
 
   // Get the destination path
-  std::string dest_path = args[args.size() - 1];
 
   for (size_t i = 1; i < args.size() - 1; i++)
   {
+    std::string dest_path = args[args.size() - 1];
     RegularFile* file_to_add = nullptr;
     // Get the source file
     std::string src_path = args[i];
@@ -330,7 +330,7 @@ void CLI::cp(const std::vector<std::string>& args) {
     else if (dest_file != nullptr && dest_file->getType() != Type::DIRECTORY) 
     {
       // The destination is not a directory and it already exists
-      std::cout << "cp: destination file already exists" << std::endl;
+      std::cout << "cp: destination file already exists: " << dest_file->getName() << std::endl;
       return;
     }
     else if (dest_file == nullptr && path_is_valid && dest_path.back() != '/') 
