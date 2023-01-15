@@ -9,7 +9,7 @@
 g++ src/* -std=c++17 -o main.exe
 
 ## Run the cli
-1. run ".\main.exe"
+run ".\main.exe"
 
 ## Run the unit tests
 1. Build the project (steps above)
