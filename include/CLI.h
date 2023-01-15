@@ -16,7 +16,6 @@ public:
   // Run the command-line interface
   void run();
 
-private:
   // Change the current working directory
   void cd(const std::vector<std::string>& args);
 
@@ -24,10 +23,10 @@ private:
   void pwd();
 
   // List the files in a directory
-  void ls(const std::vector<std::string>& args);
+  std::string ls(const std::vector<std::string>& args);
 
   // Print the contents of a file
-  void cat(const std::vector<std::string>& args);
+  std::string cat(const std::vector<std::string>& args);
 
   // Copy a file
   void cp(const std::vector<std::string>& args);
@@ -46,12 +45,6 @@ private:
 
   // Get information about a file
   void stat(const std::vector<std::string>& args);
-
-  // Mount a file system
-  void mount(const std::vector<std::string>& args);
-
-  // Unmount a file system
-  void umount(const std::vector<std::string>& args);
 
   // Split a line into components
   std::vector<std::string> splitLine(const std::string& line) const;

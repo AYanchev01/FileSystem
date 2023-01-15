@@ -31,9 +31,9 @@ void CLI::run() {
         } else if (components[0] == "pwd") {
         pwd();
         } else if (components[0] == "ls") {
-        ls(components);
+        std::cout << ls(components) << std::endl;
         } else if (components[0] == "cat") {
-        cat(components);
+        std::cout << cat(components) << std::endl;
         } else if (components[0] == "cp") {
         cp(components);
         } else if (components[0] == "rm") {
@@ -82,12 +82,14 @@ void CLI::pwd() {
  * 
  * @param args - the command line arguments
  */
-void CLI::ls(const std::vector<std::string>& args) {
+std::string CLI::ls(const std::vector<std::string>& args) {
+
+  std::string result = "";
   // Get the path to the directory to list
   std::string path;
   if (args.empty())
   {
-    return;
+    return result;
   }
   if (args.size() == 1) {
     // No path was specified, use the current working directory
@@ -100,22 +102,22 @@ void CLI::ls(const std::vector<std::string>& args) {
   // Get the directory to list
   File* file = fs_.getFile(path);
   if (file == nullptr) {
-    std::cout << "Error: no such file or directory" << std::endl;
-    return;
+    std::cout << "Error: no such file or directory:"<< path << std::endl;
+    return result;
   }
 
   if (file->getType() != Type::DIRECTORY) {
-    std::cout << "Error: not a directory" << std::endl;
-    return;
+    std::cout << "Error: not a directory:" << path << std::endl;
+    return result;
   }
   Directory* dir = dynamic_cast<Directory*>(file);
   dir->setLastAccessTime(std::time(nullptr));
 
   // Print the names of the files in the directory
   for (auto child : dir->getChildren()) {
-    std::cout << child->getName() << " ";
+    result += child->getName() + " ";
   }
-  std::cout << std::endl;
+  return result;
 }
 
 
@@ -124,26 +126,25 @@ void CLI::ls(const std::vector<std::string>& args) {
  * 
  * @param args - the command line arguments
  */
-void CLI::cat(const std::vector<std::string>& args) {
+std::string CLI::cat(const std::vector<std::string>& args) {
+    std::string result = "";
     if (args.empty())
     {
-      return;
+      return result;
     }
     if (args.size() == 1) {
       // No files passed, read from stdin and print to stdout
 
-      std::string result = "";
+        //std::string result = "";
         std::string line;
         while (true) {
           std::getline(std::cin, line);
           if (line == ".") break;
           result += line;
         }
-        std::cout << result << std::endl;
-        return;
+        //std::cout << result << std::endl;
+        return result;
     }
-  
-    std::string result = "";
 
     for (size_t i = 1; i < args.size(); i++)
     {
@@ -163,7 +164,7 @@ void CLI::cat(const std::vector<std::string>& args) {
         if (i + 1 >= args.size())
         {
           std::cout << "Error: missing output file" << std::endl;
-          return;
+          return "";
         }
         File* output_file = fs_.getFile(args[i + 1]);
         if (output_file == nullptr) {
@@ -172,18 +173,18 @@ void CLI::cat(const std::vector<std::string>& args) {
         }
         if (output_file->getType() != Type::REGULAR_FILE) {
           std::cout << "Error: output file is not a file" << std::endl;
-          return;
+          return "";
         }
         RegularFile* res = dynamic_cast<RegularFile*>(output_file);
         res->setContents(result);
-        return;
+        return "";
       }
 
       // Get the file to read and append to the result
       File* file = fs_.getFile(args[i]);
       if (file == nullptr) {
         std::cout << "Error: file not found" << std::endl;
-        return;
+        return "";
       }
       if (file->getType() != Type::REGULAR_FILE) 
       {
@@ -192,7 +193,7 @@ void CLI::cat(const std::vector<std::string>& args) {
           if (dynamic_cast<SymLink*>(file)->isBroken())
           {
             std::cout << "Error: broken symlink" << file->getName() << std::endl;
-            return;
+            return "";
           }
           else 
           {
@@ -200,12 +201,12 @@ void CLI::cat(const std::vector<std::string>& args) {
             {
               std::cout << "Error: broken symlink"<< file->getName() << std::endl;
               dynamic_cast<SymLink*>(file)->setBroken(true);
-              return;
+              return "";
             }
             else if ( dynamic_cast<SymLink*>(file)->getTarget()->getType() != Type::REGULAR_FILE)
             {
               std::cout << "Error: source should be a file or a symbolic link to a regular file" << std::endl;
-              return;
+              return "";
             }
           }
         }
@@ -213,7 +214,7 @@ void CLI::cat(const std::vector<std::string>& args) {
         {
           // The file is not a regular file or a symlink
           std::cout << "Error: source should be a file or a symbolic link to a regular file" << std::endl;
-          return;
+          return "";
         }
       }
 
@@ -235,10 +236,10 @@ void CLI::cat(const std::vector<std::string>& args) {
       // If so, print the result to stdout
       if(i == args.size() - 1)
       {
-        std::cout << result << std::endl;
-        return;
+        return result;
       }
     }
+    return result;
 }
 
 
