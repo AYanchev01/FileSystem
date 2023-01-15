@@ -14,9 +14,16 @@ FileSystem::~FileSystem() {
   deleteEntry(root);
 }
 
+/**
+ * @brief Add a file to the file system
+ * 
+ * @param file - pointer to the file
+ * @param path - path to the file
+ */
 void FileSystem::addFile(File* file, const std::string& path) {
   // Split the path into components
   std::vector<std::string> components = splitPath(path);
+
   // Find the node to add the file to
   Directory* parent = nullptr;
   // Find the target directory
@@ -43,6 +50,11 @@ void FileSystem::addFile(File* file, const std::string& path) {
   parent->addEntry(file);
 }
 
+/**
+ * @brief Helper function for deleteFile
+ * 
+ * @param node - pointer to the file
+ */
 void FileSystem::deleteEntry(File* node) {
   // Recursively delete all the children of this node
   if (node == nullptr) {
@@ -58,6 +70,11 @@ void FileSystem::deleteEntry(File* node) {
   node = nullptr;
 }
 
+/**
+ * @brief Delete a file from the file system
+ * 
+ * @param path - path to the file
+ */
 void FileSystem::deleteFile(const std::string& path) {
   // Split the path into components
   std::vector<std::string> components = splitPath(path);
@@ -73,7 +90,7 @@ void FileSystem::deleteFile(const std::string& path) {
 
   if (components.size() > 1) {
     for (size_t i = 0; i < components.size() - 1; i++) {
-      // Use the new "Directory::getChildren" method to get the children of the current directory
+      // Check if the component is in the children vector
       File* child = parent->getEntry(components[i]);
       if (child == nullptr || child->getType() != Type::DIRECTORY) {
         // The component was not found
@@ -86,7 +103,7 @@ void FileSystem::deleteFile(const std::string& path) {
   // Find the file to delete
   if (parent != nullptr) {
     // Find the iterator to the file in the parent's children list
-    // Use the new "Directory::getChildren" method to get the children of the parent directory
+    // The file is the last component of the path
     File* to_be_deleted = parent->getEntry(components.back());
     if (to_be_deleted == nullptr) {
       // The file was not found
@@ -105,6 +122,11 @@ void FileSystem::deleteFile(const std::string& path) {
 }
 
 
+/**
+ * @brief Change the current working directory
+ * 
+ * @param path - path to the directory
+ */
 void FileSystem::changeDirectory(const std::string& path) {
   // Split the path into components
   std::vector<std::string> components = splitPath(path);
@@ -144,6 +166,12 @@ void FileSystem::changeDirectory(const std::string& path) {
   cwd_->setLastMetadataChangeTime(std::time(nullptr));
 }
 
+
+/**
+ * @brief Get the current working directory
+ * 
+ * @return std::string - path to the current working directory
+ */
 std::string FileSystem::getCurrentDirectory() const {
   // Recursively build the path to the current working directory
   std::string path = "/";
@@ -214,6 +242,13 @@ Directory*& FileSystem::getRootDirectory() {
   return root_;
 }
 
+
+/**
+ * @brief Split a path into components
+ * 
+ * @param path - path to split
+ * @return std::vector<std::string> - components of the path
+ */
 std::vector<std::string> FileSystem::splitPath(const std::string& path) const{
   // Split the path on '/' and remove empty components
   std::vector<std::string> components;
@@ -234,6 +269,14 @@ std::vector<std::string> FileSystem::splitPath(const std::string& path) const{
   return components;
 }
 
+
+/**
+ * @brief Check if a path is valid
+ * 
+ * @param path - path to check
+ * @return true - the path is valid
+ * @return false - the path is invalid
+ */
 bool FileSystem::isValidPath(const std::string& path) const {
   // Split the path into components
   std::vector<std::string> components = splitPath(path);

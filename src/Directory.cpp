@@ -5,11 +5,21 @@ Directory::Directory(const std::string& name, int serial_num, std::time_t last_a
       : File(name, serial_num, last_access, last_data_change, last_metadata_change, size, Type::DIRECTORY),
         parent_(parent) {}
 
+
+/**
+ * @brief Add a Entry to the directory
+ * 
+ */
 void Directory::addEntry(File* entry) {
   entries_.push_back(entry);
   this->setSize(this->getSize() + entry->getSize());
 }
 
+/**
+ * @brief Remove a Entry from the directory
+ * 
+ * @param name - name of the entry
+ */
 void Directory::removeEntry(const std::string& name) {
   for (auto entry: entries_) {
     if (entry->getName() == name) {
@@ -19,6 +29,12 @@ void Directory::removeEntry(const std::string& name) {
   }
 }
 
+/**
+ * @brief Get a Entry from the directory
+ * 
+ * @param name - name of the entry
+ * @return File* - pointer to the entry
+ */
 File* Directory::getEntry(const std::string& name) const{
   for (auto entry: entries_) {
     if (entry->getName() == name) {
@@ -28,14 +44,29 @@ File* Directory::getEntry(const std::string& name) const{
   return nullptr;
 }
 
+/**
+ * @brief Get the Children of the directory
+ * 
+ * @return std::vector<File*> 
+ */
 std::vector<File*>& Directory::getChildren() {
   return entries_;
 }
 
+/**
+ * @brief Get the Parent directory of the directory
+ * 
+ * @return Directory* 
+ */
 Directory* Directory::getParent() const {
   return parent_;
 }
 
+/**
+ * @brief Return true if the directory is empty
+ * 
+ * @return bool - true if the directory is empty else false
+ */
 bool Directory::isEmpty() const {
   return entries_.empty();
 }

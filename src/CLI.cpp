@@ -1,8 +1,14 @@
 #include "../include/CLI.h"
 #include "../include/FileSystem.h"
 
+
 CLI::CLI(FileSystem& fs) : fs_(fs) {}
 
+
+/**
+ * @brief runs the command interpreter loop
+ * 
+ */
 void CLI::run() {
         while (true) {
         // Print the prompt
@@ -19,7 +25,7 @@ void CLI::run() {
         continue;
         }
 
-        // Dispatch the command
+        // Interpret the command
         if (components[0] == "cd") {
         cd(components);
         } else if (components[0] == "pwd") {
@@ -48,6 +54,12 @@ void CLI::run() {
     }
 }
 
+
+/**
+ * @brief change the current working directory
+ * 
+ * @param args - the command line arguments
+ */
 void CLI::cd(const std::vector<std::string>& args) {
     if (args.size() != 2) {
         std::cout << "Usage: cd <directory>" << std::endl;
@@ -56,11 +68,20 @@ void CLI::cd(const std::vector<std::string>& args) {
     fs_.changeDirectory(args[1]);
 }
 
-
+/**
+ * @brief print the current working directory
+ * 
+ */
 void CLI::pwd() {
   std::cout << fs_.getCurrentDirectory() << std::endl;
 }
 
+
+/**
+ * @brief list the contents of a directory
+ * 
+ * @param args - the command line arguments
+ */
 void CLI::ls(const std::vector<std::string>& args) {
   // Get the path to the directory to list
   std::string path;
@@ -89,6 +110,7 @@ void CLI::ls(const std::vector<std::string>& args) {
   }
   Directory* dir = dynamic_cast<Directory*>(file);
   dir->setLastAccessTime(std::time(nullptr));
+
   // Print the names of the files in the directory
   for (auto child : dir->getChildren()) {
     std::cout << child->getName() << " ";
@@ -96,12 +118,20 @@ void CLI::ls(const std::vector<std::string>& args) {
   std::cout << std::endl;
 }
 
+
+/**
+ * @brief print the contents of a file, or read from stdin and write to a file, or concatenate files
+ * 
+ * @param args - the command line arguments
+ */
 void CLI::cat(const std::vector<std::string>& args) {
     if (args.empty())
     {
       return;
     }
     if (args.size() == 1) {
+      // No files passed, read from stdin and print to stdout
+
       std::string result = "";
         std::string line;
         while (true) {
@@ -113,10 +143,12 @@ void CLI::cat(const std::vector<std::string>& args) {
         return;
     }
   
-    // Get the file from the file system
     std::string result = "";
+
     for (size_t i = 1; i < args.size(); i++)
     {
+
+      // Check if we are writing to a file
       if (args[i] == ">")
       {
         if(i == 1)
@@ -147,7 +179,7 @@ void CLI::cat(const std::vector<std::string>& args) {
         return;
       }
 
-
+      // Get the file to read and append to the result
       File* file = fs_.getFile(args[i]);
       if (file == nullptr) {
         std::cout << "Error: file not found" << std::endl;
@@ -179,6 +211,7 @@ void CLI::cat(const std::vector<std::string>& args) {
         }
         else 
         {
+          // The file is not a regular file or a symlink
           std::cout << "Error: source should be a file or a symbolic link to a regular file" << std::endl;
           return;
         }
@@ -198,6 +231,8 @@ void CLI::cat(const std::vector<std::string>& args) {
       if(!result.empty()) { result += "\n"; }
       result += reg_file->getContents();
 
+      // Check if we are at the end of the arguments
+      // If so, print the result to stdout
       if(i == args.size() - 1)
       {
         std::cout << result << std::endl;
@@ -206,6 +241,12 @@ void CLI::cat(const std::vector<std::string>& args) {
     }
 }
 
+
+/**
+ * @brief copy a file to a destination
+ * 
+ * @param args - the command line arguments
+ */
 void CLI::cp(const std::vector<std::string>& args) {
   // Check if the number of arguments is correct
   if (args.size() < 3) {
@@ -270,6 +311,7 @@ void CLI::cp(const std::vector<std::string>& args) {
 
     src_file->setLastAccessTime(std::time(nullptr));
 
+    // Create a new file with the same properties as the source file
     file_to_add = new RegularFile(src_file->getName(), rand() % 100001, std::time(nullptr), std::time(nullptr),
       std::time(nullptr), src_file->getSize(), Type::REGULAR_FILE);
     file_to_add->setContents(dynamic_cast<RegularFile*>(src_file)->getContents());
@@ -283,16 +325,21 @@ void CLI::cp(const std::vector<std::string>& args) {
       // The destination is a directory, append the source file name
       dest_path += '/';
       dest_path += src_file->getName();
-    }else if (dest_file != nullptr && dest_file->getType() != Type::DIRECTORY) {
+    }
+    else if (dest_file != nullptr && dest_file->getType() != Type::DIRECTORY) 
+    {
       // The destination is not a directory and it already exists
       std::cout << "cp: destination file already exists" << std::endl;
       return;
     }
-    else if (dest_file == nullptr && path_is_valid && dest_path.back() != '/') {
+    else if (dest_file == nullptr && path_is_valid && dest_path.back() != '/') 
+    {
       // The destination includes the new file name and its parent is a directory
       // Nothing to be done
       file_to_add->setName(components.back());
-    }else{
+    }
+    else
+    {
       std::cout << "The destination is not a directory" << std::endl;
       return;
     }
@@ -308,6 +355,12 @@ void CLI::cp(const std::vector<std::string>& args) {
   }
 }
 
+
+/**
+ * @brief remove a file from the file system
+ * 
+ * @param args - the command line arguments
+ */
 void CLI::rm(const std::vector<std::string>& args) {
   if (args.size() < 2) {
     std::cout << "Invalid number of arguments for rm." << std::endl;
@@ -325,6 +378,12 @@ void CLI::rm(const std::vector<std::string>& args) {
   }
 }
 
+
+/**
+ * @brief Create a new directory
+ * 
+ * @param args - the command line arguments
+ */
 void CLI::mkdir(const std::vector<std::string>& args) {
   if (args.size() != 2) {
     std::cout << "Usage: mkdir <path>" << std::endl;
@@ -350,27 +409,34 @@ void CLI::mkdir(const std::vector<std::string>& args) {
       std::cout << "Error: " << components[i] << "is not a directory!" << std::endl;
       return;
     }
-    // Use the new "Directory::getChildren" method to get the children of the current directory
+    // Get the next directory in the path
     parent = dynamic_cast<Directory*>(parent->getEntry(components[i]));
   }
 
-  // Check if the new directory already exists
+  // Check if the parent is a directory
   if (parent->getType() != Type::DIRECTORY) {
     std::cout << "Error: " << components[components.size() - 2] << "is not a directory!" << std::endl;
     return;
   }
 
+  // Check if the new directory already exists
   if (parent->getEntry(components.back()) != nullptr) {
     std::cout << "Error: directory already exists" << std::endl;
     return;
   }
 
-  // Create the new directory
+  // Create the new directory and add it to the parents children
   Directory* child;
   child = new Directory(components.back(), rand() % 100001, std::time(nullptr), std::time(nullptr), std::time(nullptr), 0, parent);
   parent->getChildren().push_back(child);
 }
 
+
+/**
+ * @brief remove a directory from the file system if it is empty
+ * 
+ * @param args - the command line arguments
+ */
 void CLI::rmdir(const std::vector<std::string>& args) {
   // Check if the number of arguments is correct
   if (args.size() != 2) {
@@ -414,6 +480,12 @@ void CLI::rmdir(const std::vector<std::string>& args) {
   delete dir;
 }
 
+
+/**
+ * @brief create a symbolic link to a file
+ * 
+ * @param args - the command line arguments
+ */
 void CLI::ln(const std::vector<std::string>& args) {
   if (args.size() != 4) {
     std::cout << "Usage: ln -s <src> <dst>" << std::endl;
@@ -443,6 +515,7 @@ void CLI::ln(const std::vector<std::string>& args) {
     return;
   }
 
+  // Create the symbolic link
   File* symlink = new SymLink(dst_components.back(), rand() % 100001, std::time(nullptr), std::time(nullptr), std::time(nullptr), sizeof(File*), src_file);
 
   if (dst_components.size() == 1) {
@@ -458,6 +531,12 @@ void CLI::ln(const std::vector<std::string>& args) {
   }
 }
 
+
+/**
+ * @brief print the meta data of a file
+ * 
+ * @param args - the command line arguments
+ */
 void CLI::stat(const std::vector<std::string>& args) {
   // Check if a file was specified
   if (args .size() < 2) {
@@ -486,6 +565,13 @@ void CLI::stat(const std::vector<std::string>& args) {
   }
 }
 
+
+/**
+ * @brief Split a line into its components, separated by spaces
+ * 
+ * @param line - the line to split
+ * @return std::vector<std::string> - the components of the line
+ */
 std::vector<std::string> CLI::splitLine(const std::string& line) const {
   // Create a vector to store the components of the line
   std::vector<std::string> components;
