@@ -11,6 +11,7 @@
 #include <vector>
 #include <iostream>
 #include "RegularFile.h"
+#include <cstdlib>
 
 
 // Forward declaration of the File class

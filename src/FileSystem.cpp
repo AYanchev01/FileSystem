@@ -4,6 +4,8 @@ FileSystem::FileSystem() {
   // Create the root directory and set it as the current working directory
   root_ = new Directory("/", 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 0, nullptr);
   cwd_ = root_;
+
+  std::srand(std::time(nullptr));
 }
 
 FileSystem::~FileSystem() {
@@ -33,7 +35,7 @@ void FileSystem::addFile(File* file, const std::string& path) {
       // The component was not found, create a new node
       // Use the new constructor of the Directory class, passing the parent directory as an argument
       std::cout << "Creating directory: " << components[i] << std::endl;
-      parent->addEntry(new Directory(components[i], 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 0, parent));
+      parent->addEntry(new Directory(components[i], rand() % 100001, std::time(nullptr), std::time(nullptr), std::time(nullptr), 0, parent));
       parent = (Directory*) parent->getChildren().back();
     }
   }
@@ -72,13 +74,13 @@ void FileSystem::deleteFile(const std::string& path) {
   if (components.size() > 1) {
     for (size_t i = 0; i < components.size() - 1; i++) {
       // Use the new "Directory::getChildren" method to get the children of the current directory
-      File* new_parent = parent->getEntry(components[i]);
-      if (new_parent == nullptr || new_parent->getType() != Type::DIRECTORY) {
+      File* child = parent->getEntry(components[i]);
+      if (child == nullptr || child->getType() != Type::DIRECTORY) {
         // The component was not found
         std::cout << "Directory not found: " << components[i] <<std::endl;
         return;
       }
-      parent = dynamic_cast<Directory*>(new_parent);
+      parent = dynamic_cast<Directory*>(child);
     }
   }
   // Find the file to delete

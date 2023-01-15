@@ -135,7 +135,7 @@ void CLI::cat(const std::vector<std::string>& args) {
         }
         File* output_file = fs_.getFile(args[i + 1]);
         if (output_file == nullptr) {
-          fs_.addFile(new RegularFile((fs_.splitPath(args[i + 1])).back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), result.size(), Type::REGULAR_FILE), args[i + 1]);
+          fs_.addFile(new RegularFile((fs_.splitPath(args[i + 1])).back(), rand() % 100001, std::time(nullptr), std::time(nullptr), std::time(nullptr), result.size(), Type::REGULAR_FILE), args[i + 1]);
           output_file = fs_.getFile(args[i + 1]);
         }
         if (output_file->getType() != Type::REGULAR_FILE) {
@@ -270,8 +270,8 @@ void CLI::cp(const std::vector<std::string>& args) {
 
     src_file->setLastAccessTime(std::time(nullptr));
 
-    file_to_add = new RegularFile(src_file->getName(), src_file->getSerialNum(), src_file->getLastAccessTime(), src_file->getLastDataChangeTime(),
-      src_file->getLastMetadataChangeTime(), src_file->getSize(), Type::REGULAR_FILE);
+    file_to_add = new RegularFile(src_file->getName(), rand() % 100001, std::time(nullptr), std::time(nullptr),
+      std::time(nullptr), src_file->getSize(), Type::REGULAR_FILE);
     file_to_add->setContents(dynamic_cast<RegularFile*>(src_file)->getContents());
 
     // Check if the destination path is a directory
@@ -366,9 +366,9 @@ void CLI::mkdir(const std::vector<std::string>& args) {
   }
 
   // Create the new directory
-  Directory* new_dir;
-  new_dir = new Directory(components.back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), 0, parent);
-  parent->getChildren().push_back(new_dir);
+  Directory* child;
+  child = new Directory(components.back(), rand() % 100001, std::time(nullptr), std::time(nullptr), std::time(nullptr), 0, parent);
+  parent->getChildren().push_back(child);
 }
 
 void CLI::rmdir(const std::vector<std::string>& args) {
@@ -443,7 +443,7 @@ void CLI::ln(const std::vector<std::string>& args) {
     return;
   }
 
-  File* symlink = new SymLink(dst_components.back(), 0, std::time(nullptr), std::time(nullptr), std::time(nullptr), sizeof(File*), src_file);
+  File* symlink = new SymLink(dst_components.back(), rand() % 100001, std::time(nullptr), std::time(nullptr), std::time(nullptr), sizeof(File*), src_file);
 
   if (dst_components.size() == 1) {
     fs_.addFile(symlink, dst_path);
@@ -474,6 +474,8 @@ void CLI::stat(const std::vector<std::string>& args) {
       return;
     }
 
+    file->setLastAccessTime(std::time(nullptr));
+    
     // Print the file's information
     std::cout << "Name: " << file->getName() << std::endl;
     std::cout << "Serial number: " << file->getSerialNum() << std::endl;
