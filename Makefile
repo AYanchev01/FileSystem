@@ -11,7 +11,7 @@ OBJECTS = $(SOURCES:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 all: build
 
 build: checkdir $(OBJECTS)
-	$(CC) $(OBJECTS) -o main.exe
+	$(CC) $(OBJECTS) -o filesystem.exe
 
 checkdir:
 	if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
@@ -21,4 +21,4 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 clean:
 	if exist $(BUILD_DIR) rmdir /Q /S $(BUILD_DIR)
-	if exist main.exe del main.exe
+	if exist filesystem.exe del filesystem.exe

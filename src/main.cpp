@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
   }
   else
   {
-    std::cout << "Usage: .\\main.exe [--test]" << std::endl;
+    std::cout << "Usage: .\\filesystem.exe [--test]" << std::endl;
   }
 
   return 0;
