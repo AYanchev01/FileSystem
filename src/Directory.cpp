@@ -18,6 +18,8 @@ void Directory::addEntry(File* entry) {
   }
   entries_.push_back(entry);
   this->setSize(this->getSize() + entry->getSize());
+  this->setLastAccessTime(std::time(nullptr));
+  this->setLastDataChangeTime(std::time(nullptr));
 }
 
 /**
@@ -29,9 +31,11 @@ void Directory::removeEntry(const std::string& name) {
   for (auto entry: entries_) {
     if (entry->getName() == name) {
       entries_.erase(std::remove(entries_.begin(), entries_.end(), entry), entries_.end());
+      this->setLastDataChangeTime(std::time(nullptr));
       break;
     }
   }
+  this->setLastAccessTime(std::time(nullptr));
 }
 
 /**
