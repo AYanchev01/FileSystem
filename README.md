@@ -1,4 +1,5 @@
 # Filesystem project
+- Uni project to practice OOP/DS, mocking some fs manipulation programs
 
 ## Build the project
 
